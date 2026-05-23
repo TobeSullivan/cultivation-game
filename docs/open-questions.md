@@ -29,6 +29,10 @@ For locked design (currency model, building tier curves, partner passive distrib
 - **Pairing convention universality.** Whether the Strike↔Vitality-style pairing convention is truly consistent across all 12 themes or whether some themes should deliberately break for variety.
 - **Spirit stone exchange rate / sink list.** Rough 1 stone ≈ 1,000 essence locked, specific sinks TBD beyond locked ones (high-meridian refinement, T5+ building costs, generic recruitment, fodder 0.1% drop, mini-boss 1 guaranteed, boss 3–5, realm-final 15).
 
+- **Painterly architecture vs flat-vector backdrop coexistence (NEW 2026-05-23 session 4).** Session 3 locked flat vector for buildings after Main Hall v1 came back flat. Session 4 user-chose v3 painterly (Studio Ghibli–register) which retired that lock. Backdrop layers (mountains, mist) remain flat vector. Current hub_test composites both styles. Three paths: (a) regenerate backdrop in painterly to match, (b) regenerate buildings in flat vector to match backdrop, (c) accept cross-style as intentional. **Deferred until 2–3 more buildings exist** — single building isn't enough surface to judge the full-scene cohesion vs jarring read. See [design-pass.md open questions](prototype/design-pass.md#open-questions-post-design-pass).
+
+- **Head-only building tier states** — pre-existing discrepancy carried forward. Surface 5 specs "10 buildings × 2 visual stages = 20" but Art Inventory lists Main Hall + Personal Sanctum as single state each (= 18 total). Skyline architecture pivot didn't resolve. Main Hall v3 currently locked as single-state — decision pending on whether head-only buildings progress through tier visuals or stay static. Lower priority than the painterly coexistence question.
+
 ---
 
 ## Deferred for Later (Design Work, Not Open Questions)
@@ -55,7 +59,7 @@ For locked design (currency model, building tier curves, partner passive distrib
 - **NG+ ("Cultivation Rebirth")** — outlined as concept, not designed. Endgame consideration only.
 - **R12 apex callback track** — Suno track for R12 apex moment that callbacks the title screen melody. Open: vocal language (constructed cultivation tongue vs Mandarin vs other), specific instrumentation, where exactly it triggers.
 - **Evolution-eligibility rules per card** — which of the 96 day-1 cards have evolved forms, conditions to evolve, paired-passive requirements. Affects evolved card art count and Forge track structure. Card draft *mechanics* locked tranche 3, but per-card eligibility rules are content-authoring work.
-- **Hub building layout** — specific positions of all 10 buildings on the sect compound. Walled mountain plateau aesthetic locked; specific composition TBD when first building art lands.
+- ~~**Hub building layout**~~ → **RESOLVED 2026-05-23 session 2** via the architecture pivot to front-facing skyline. Building placement is emergent per-building in Godot (horizontal x + depth-layer assignment), not pre-planned. hub_test scene session 4 validates the approach with the first locked building (Main Hall).
 - **Mobile virtual button positioning** — VS-style fixed-position auto-fade locked as the model. Specific button placements / sizes / fade behavior TBD when mobile port becomes active scope.
 - **Era-evolution art passes** — all prototype assets are Mortal-era. Transcendent/Immortal/Divine/Eternal era visual identities need passes for MC sprites, hub compound aesthetic, and (eventually) building art. Post-prototype.
 - **Run-start screen UI layout** — requirements locked tranche 3 (theme tabs primary, archetype sub-filter, favorites pin, search box, card preview pane, <30sec browse target). Specific layout / animation / controller focus state / mobile touch targets deferred to prototype UI pass.
@@ -75,7 +79,29 @@ Items 2-4 are largely content-authoring better suited to spreadsheet work than c
 
 ---
 
-## Resolved This Session (2026-05-22, Gap-Closing Tranche 4)
+## Resolved 2026-05-23 Session 4 (Claude Code Kickoff)
+
+For reference; do not re-open without new information.
+
+- **Godot project bootstrap** → Done. `game/` directory created with `project.godot` (viewport 1920×1080, GL Compatibility renderer, smooth texture filter), `scenes/`, `scripts/`, `assets/` (mirrored from repo root for res:// import), `resources/`, `data/`. Project loads without errors, runs in editor and headless mode.
+
+- **hub_test scene composite** → Validated. Front-facing skyline composition assembles correctly at 1920×1080. Layer stack: gradient sky / mountains (y=350 scaled 1.43×) / mist (3 sprites programmatic radial gradient with normal alpha blend, drifting 4/6/9 px/sec) / grey ground (y=935–1080 slate) / black horizon platform (y=895–935, 40px) / Main Hall v3 (centered, 0.45× scale, bottom flush with platform) / CrowdFG (18 silhouettes scattered y=1020–1045, scales 0.08–0.14, bob/shuffle one-at-a-time on 1.5–5s random interval).
+
+- **Reusable scene scripts written** → `drift.gd` (horizontal-drift component with wrap, used by mist; also tunable for future cloud / parallax sprites). `crowd_bob.gd` (sparse bob controller, asymmetric 1.2s/1.0s SINE ease-in-out tween, 5px amplitude, one figure per pick). `screenshot_and_quit.gd` (dev utility for headless renders, supports `repo://` scheme to land outputs in repo root).
+
+- **Clouds asset state corrected** → `assets/hub/clouds.png` was discovered to have a solid white opaque background (not the baked checkerboard documented in session 2). Keyed in session 4 via existing key script (white pixels pass the desaturated + bright selector identically to checkerboard pixels). Now true RGBA. 8 individual cloud forms extracted to `assets/hub/clouds/cloud_NN.png` via new `tools/extract_cloud_pieces.py` (scipy connected-components labeling). Currently unused in hub_test — single-cloud-sprite drift exposed sparse coverage; user opted to defer clouds until better individual-cloud asset variety lands.
+
+- **9 crowd silhouettes keyed** → All passed through `tools/key_out_checkerboard.py`. Dimensions vary 429–790 wide × 716–768 tall. Bbox-cropped to figure. In game in `game/assets/hub/crowd/`. Each used twice in hub_test composition (half horizontally flipped via negative scale.x for variation, 18 total figures).
+
+- **Main Hall locked v3 painterly** → Replaces both v1 navy roof (locked session 3) and v2 warm olive (interim session 4). Painterly Studio Ghibli–register, includes baked bonsai tree and stone shrine. Keyed and in game at `assets/buildings/main_hall.png` (1327×613). v1 + v2 preserved as versioned files for reference. Style coexistence with flat-vector backdrop is now open (see Other Open).
+
+- **Cook-before-code rule established** → Memory file at `memory/feedback_cook_before_code.md`. Project-specific rule: propose plan and wait for explicit approval before any Edit/Write/Bash that mutates state. Established mid-session after a cluster of unilateral iterations on hub_test composition burned through tokens.
+
+- **Python toolchain set up** → Python 3.12.10 installed via winget. `pip install Pillow numpy scipy` complete. `tools/key_out_checkerboard.py` (existing) + `tools/extract_cloud_pieces.py` (new this session) both runnable.
+
+---
+
+## Resolved 2026-05-22 (Gap-Closing Tranche 4)
 
 For reference; do not re-open without new information.
 

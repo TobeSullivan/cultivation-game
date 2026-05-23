@@ -16,21 +16,25 @@ Companion to [design-pass.md](design-pass.md) (specs) and [../tech-stack.md](../
 
 ---
 
-## Style Locks (2026-05-23, updated session 2)
+## Style Locks (2026-05-23, updated session 4)
 
 | Lock | Value | Source |
 |---|---|---|
-| Art style — architecture | Hand-painted illustrated 2D, Avatar TLA aesthetic family (painterly cel-shading, visible brushwork) | User decision 2026-05-23 |
-| Art style — backdrop landscape layers | Flat vector with hard shape gradients, deep blue palette | Accepted tool-reality 2026-05-23 session 2 (Ludo holds painted style reliably on architecture, drifts to flat vector on landscape — both styles coexist via parallax depth) |
+| Art style — backdrop landscape layers | Flat vector with hard shape gradients, deep blue palette | Locked 2026-05-23 session 2 |
+| Art style — architecture | **OPEN — style coexistence question** | Session 3 locked flat vector after first Main Hall (navy roof) came back flat. Session 4 user-chose v2 warm olive (still flat vector). Session 4 user-chose v3 painterly (Studio Ghibli–register) → flat-vector-architecture lock retired. Now: painterly building on flat-vector backdrop. Decision deferred — see open-questions.md. |
 | Camera angle | Front-facing 2D skyline | Revised 2026-05-23 session 2 (was 3/4 angled top-down — abandoned with architecture pivot) |
 | Hub architecture | 6-layer parallax stack: sky / mountains / clouds / mist / buildings / crowd FG | Locked 2026-05-23 session 2 |
+| Hub composite | hub_test.tscn validated 2026-05-23 session 4. Layer stack composites correctly at 1920×1080. Mountains y=350 / Ground 935–1080 / HorizonPlatform 895–935 black 40px / MainHall 0.45× / 18-figure crowd at y≈1020–1045 / 3-sprite mist with normal-blend pale-cool gradient drifting 4/6/9 px/sec. | New |
 | Reference 1 — Characters family | Avatar TLA character lineup | Existing |
 | Reference 1 — Environments + buildings family | Avatar TLA environment screenshot (Air Temple establishing shot) | New 2026-05-23 |
-| Locked Reference 2 — Backdrop layers | Mountains layer locked 2026-05-23 session 2 | New |
+| Locked Reference 2 — Mountains layer | Locked 2026-05-23 session 2 | Existing |
+| Locked Reference 2 — Buildings family | **OPEN** — was Main Hall (locked session 3) → retired session 4 by v3 painterly replacement. Painterly Main Hall would normally become new Ref 2; pending style coexistence decision. | New |
 | Ludo Pipeline | See [design-pass.md > Asset Pipeline](design-pass.md#asset-pipeline) | Verified 2026-05-23 |
-| Generate-then-Edit pattern | Two-step: Generate New on opaque background → Edit Image to strip background | Locked 2026-05-23 session 2 |
+| Generate-then-Edit-then-key pipeline | Three-step: Generate New on opaque background → Edit Image to strip → `tools/key_out_checkerboard.py` to convert baked checkerboard to true RGBA | Locked 2026-05-23 session 3 (drift #23 forced step 3) |
 
 **Architecture pivot 2026-05-23 session 2:** Original iso compound architecture (background plate + 10 iso building sprites) abandoned. The building-isometric-vs-plate-perspective open question is resolved by the pivot — front-facing skyline puts buildings and backdrop on the same camera orientation. Original `stone_floor.png` plate INVALIDATED.
+
+**Asset-state surprise 2026-05-23 session 4:** `clouds.png` was discovered to have a SOLID WHITE opaque background, not the baked checkerboard documented in session 2. Session 2 lock "transparent PNG" was incorrect — file was opaque-white-bg until session 4 keying. Key script worked correctly on it anyway (white pixels are desaturated + bright, same selector as checkerboard).
 
 ---
 
@@ -109,10 +113,10 @@ Companion to [design-pass.md](design-pass.md) (specs) and [../tech-stack.md](../
 
 | Layer | Status | Date | Notes |
 |---|---|---|---|
-| Sky | Godot-native | n/a | Solid color or gradient in Godot scene; no Ludo asset. Allows time-of-day tinting via shader/color swap. |
-| Mountains | LOCKED | 2026-05-23 s2 | Flat vector, deep blues, hard shape gradients. Back layer, static or slow parallax. Source: Generate New from env Reference 1, kept as 2nd of 2 batch. |
-| Clouds | LOCKED | 2026-05-23 s2 | Transparent PNG, white forms with light-blue underlining. Source: Edit Image on the same mountain-scene source, "Remove mountains and mist, keep only clouds." Drifts horizontally in Godot. |
-| Mist | Godot-native | n/a | Hand-authored sprites (soft, low-opacity, additive blend, slow drift). Ludo's mist output didn't match painted source; Godot-native fits better and is cheaper. |
+| Sky | IN GAME (Godot-native) | 2026-05-23 s4 | TextureRect + GradientTexture2D top-to-bottom (cool blue → pale blue). Allows time-of-day tinting via gradient swap. `game/scenes/hub_test.tscn` Sky node. |
+| Mountains | IN GAME (LOCKED) | 2026-05-23 s2 / imported s4 | Flat vector, deep blues. `game/assets/hub/mountains.png` 1344×768, scaled 1.43× at y=350 in hub_test. |
+| Clouds | KEYED (currently unused) | 2026-05-23 s4 | True RGBA via session 4 keying. Source `assets/hub/clouds.png` 1344×252 after bbox crop. 8 individual cloud forms extracted to `assets/hub/clouds/cloud_01..08.png` via `tools/extract_cloud_pieces.py`. **Dropped from hub_test in session 4** — single-sprite drift exposed sparse coverage + pixelated edges; user opted to defer clouds until better individual-cloud asset variety lands. |
+| Mist | IN GAME (Godot-native) | 2026-05-23 s4 | Three Sprite2D nodes with programmatic radial GradientTexture2D (pale cool grey-blue #b8c4d0 center, fade to transparent edge). Normal alpha blend, opacity 0.55. Each elongated to varied widths/heights (3.125×0.78, 3.9×0.7, 2.7×0.86). Drifts 4/6/9 px/sec via `drift.gd`. Sits in y=750–900 seam band. Not a Ludo asset — Godot-only. |
 
 ### Invalidated assets (architecture pivot)
 
@@ -124,7 +128,7 @@ Companion to [design-pass.md](design-pass.md) (specs) and [../tech-stack.md](../
 
 | Building | T1 | T4 | Notes |
 |---|---|---|---|
-| Main Hall (head-only) | TODO | n/a | Session 1 iso gens INVALIDATED by architecture pivot. Regeneration pending in front-facing skyline register; will be first test of building style register open question. |
+| Main Hall (head-only) | **LOCKED v3 painterly** | n/a | `assets/buildings/main_hall.png` 1327×613 keyed RGBA (2026-05-23 s4). Painterly Studio Ghibli–register, includes baked bonsai tree (left) and stone shrine (right). v1 navy-roof + v2 warm-olive preserved as `main_hall_v1_navy_roof.png` / `main_hall_v2_warm_olive.png`. Style coexistence with flat-vector backdrop OPEN. |
 | Personal Sanctum (head-only) | TODO | n/a | Single state per existing scope (status open — see Open Questions in design-pass.md) |
 | Recruitment Hall | TODO | TODO | |
 | Teahouse | TODO | TODO | |
@@ -137,21 +141,23 @@ Companion to [design-pass.md](design-pass.md) (specs) and [../tech-stack.md](../
 
 *Note: head-only "single state" framing is a pre-existing discrepancy with Surface 5's "10 × 2 = 20" framing — flagged in [design-pass.md open questions](design-pass.md#open-questions-post-design-pass), still open after architecture pivot. Both head-only buildings still exist in the skyline; tier-progression vs static decision pending.*
 
-### Crowd FG silhouette pool (Locked 2026-05-23 session 2)
+### Crowd FG silhouette pool (Locked 2026-05-23 session 2, keyed + in game session 4)
 
-Pool of 9 unique silhouettes, all waist-up, back-facing (facing the sect), hands clasped behind back, pure black figures on transparent PNG. Composed in Godot at runtime — selection / scaling / distribution / sparse bob-shuffle tween handle population growth.
+Pool of 9 unique silhouettes, all waist-up, back-facing (facing the sect), hands clasped behind back, pure black figures on now-true-RGBA PNG (keyed session 4 via `tools/key_out_checkerboard.py`). Composed in Godot at runtime — selection / scaling / distribution / sparse bob-shuffle tween handle population growth.
 
-| # | Silhouette | Status | Notes |
-|---|---|---|---|
-| 1 | Upright topknot (male) | LOCKED | Original gen, the base pose |
-| 2 | Bowed-head topknot (male) | LOCKED | Head slightly bowed, distinct profile from #1 |
-| 3 | Ceremonial hat (court official) | LOCKED | Flat-top imperial hat, wider shoulder mantle |
-| 4 | Long-hair tied back (male, low ponytail) | LOCKED | Unexpected output from elder prompt — hair-down silhouette variant |
-| 5 | Long flowing hair (female) | LOCKED | Wind-blown asymmetric hair, strongest silhouette variant in the pool |
-| 6 | High-bun (female) | LOCKED | Bun + side hair-loops, distinct top-of-head from #1 |
-| 7 | Broad heavyset (male) | LOCKED | Body mass axis, completely different overall profile |
-| 8 | Pointed hood | LOCKED | Monastic / mysterious register, hood reshapes head outline |
-| 9 | Cowl hood (draping) | LOCKED | Softer hood variant, traveler / wanderer register |
+| # | Silhouette | File | Status | Notes |
+|---|---|---|---|---|
+| 1 | Upright topknot (male) | `male_topknot.png` 449×764 | IN GAME | Used twice in hub_test |
+| 2 | Bowed-head topknot (male) — older | `old_topknot.png` 526×757 | IN GAME | Used twice in hub_test |
+| 3 | Ceremonial hat (court official) | `fancy_hat.png` 429×758 | IN GAME | Used twice in hub_test |
+| 4 | Long-hair tied back (female low ponytail) | `female_long_hair.png` 677×747 | IN GAME | Used twice in hub_test (one flipped) |
+| 5 | Long flowing hair (female topknot) | `female_topknot.png` 514×768 | IN GAME | Used twice in hub_test |
+| 6 | High-bun / hooded female | `hooded_female.png` 563×752 | IN GAME | Used twice in hub_test |
+| 7 | Broad heavyset (large monk) | `large_monk.png` 790×716 | IN GAME | Widest silhouette; used twice |
+| 8 | Strong monk | `strong_monk.png` 572×732 | IN GAME | Used twice in hub_test |
+| 9 | Pointed hood | `hooded.png` 526×747 | IN GAME | Used twice in hub_test |
+
+**In-game composition (hub_test session 4):** 18 figures (each silhouette twice, half horizontally flipped via negative scale.x for variation). Scales 0.08–0.14 (small). Baselines aligned at y=1075. Uneven horizontal spacing (60–150px gaps) with two visible clusters (left x=150–430, right x=1370–1540) and looser middle spread. Bob/shuffle controller (`crowd_bob.gd`) picks one figure at a time on a 1.5–5s random interval, runs an asymmetric down-then-up tween (1.2s sink, 1.0s recover, 5px amplitude, SINE ease-in-out). Pool expandable later if needed.
 
 Pool expandable later if needed (drift pattern: 10-12 was target, stopped at 9 once variety read as crowd). Bald monk attempted but cut (too similar to topknot at silhouette scale). Back-facing elder attempted twice, failed both — Ludo doesn't render back-view beards reliably; if elder is needed later, may need to accept front-facing as an outlier figure or skip entirely.
 
@@ -310,7 +316,7 @@ Count and identity deferred — depends on evolution-eligibility rules (see [ope
 
 ## Reference Assets (dev-only)
 
-Stored in **Ludo Favorites** + local working files. The previously documented `res://assets/_references/` path does not exist yet — Godot project hasn't been created. References will be copied into `res://assets/_references/` at code-phase kickoff per [CLAUDE.md](../../CLAUDE.md).
+Stored in **Ludo Favorites** + local working files. Godot project exists at `game/` as of 2026-05-23 session 4, but Reference 1/2 assets have not yet been copied into `res://assets/_references/` — currently only locked production assets are mirrored into `game/assets/`. Reference copy is a follow-up task.
 
 ### Reference 1 anchors (per macro family)
 
@@ -326,6 +332,6 @@ Stored in **Ludo Favorites** + local working files. The previously documented `r
 | Locked MC (V2 Image 1) | Character pipeline | LOCKED | 2026-05-20 session |
 | Mountains backdrop layer | Hub backdrop layers | LOCKED | 2026-05-23 session 2. Anchors style for any future backdrop work (Realm 2+ regional skylines, etc.) |
 | Image 1 silhouette (upright topknot) | Crowd FG silhouette pool | LOCKED | 2026-05-23 session 2. First locked figure in the pool; anchors style for any future crowd additions |
-| First locked building | Specialty building gens | TBD | Will be the Main Hall once regenerated in the front-facing skyline register and locked. First building also tests the open question on building style register under skyline architecture. |
+| First locked building | Specialty building gens | OPEN | Main Hall is in its third locked version (v3 painterly). Would normally become the buildings-family Reference 2 anchor; pending style coexistence decision (see open-questions.md). |
 | First locked card frame + item | Card pipeline | TBD | Future |
 | ~~Compound background plate (`stone_floor.png`)~~ | ~~Hub buildings + canvas changes~~ | INVALIDATED 2026-05-23 s2 | Original iso compound architecture abandoned; plate no longer in the layer stack |

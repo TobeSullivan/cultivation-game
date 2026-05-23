@@ -47,7 +47,29 @@ One-line map of what exists in the repo. Updated when files are added/moved/remo
 
 ## game/ — Godot Project
 
-Does not exist yet. Will be created on prototype build kick-off per [docs/tech-stack.md](docs/tech-stack.md) build order.
+Created 2026-05-23 session 4 (Claude Code kickoff). Godot 4.6.3 stable, GDScript.
+
+- `project.godot` — viewport 1920×1080, GL Compatibility renderer
+- `scenes/hub_test.tscn` — front-facing skyline composite: sky gradient + mountains + 3 mist sprites (additive blend, slow drift) + grey ground + black horizon line + Main Hall v3 + 18-figure crowd FG silhouette layer with bob/shuffle tween
+- `scripts/drift.gd` — generic horizontal-drift component with wrap (used by mist sprites)
+- `scripts/crowd_bob.gd` — sparse weight-shift tween controller on CrowdFG (one figure at a time, 1.5–5s random intervals, asymmetric 1.2s/1.0s ease-in-out)
+- `scripts/screenshot_and_quit.gd` — dev utility for headless renders (supports `repo://` path scheme to land screenshots in repo root)
+- `assets/` — mirrored copies of locked hub assets imported into res://
+
+## tools/ — Reusable Scripts
+
+- [tools/key_out_checkerboard.py](tools/key_out_checkerboard.py) — strip Ludo's baked checkerboard background (drift #23), produce true RGBA. Used on Main Hall, clouds, and 9 crowd silhouettes.
+- [tools/extract_cloud_pieces.py](tools/extract_cloud_pieces.py) — connected-components labeling on a keyed cloud PNG, split into individual cloud sprite files. Output unused in current scene (clouds dropped, may revisit).
+
+## assets/ — Locked Pre-Godot Art
+
+- [assets/buildings/main_hall.png](assets/buildings/main_hall.png) — v3 painterly, current lock (2026-05-23 session 4)
+- [assets/buildings/main_hall_v1_navy_roof.png](assets/buildings/main_hall_v1_navy_roof.png) — preserved (session 3 lock, retired session 4)
+- [assets/buildings/main_hall_v2_warm_olive.png](assets/buildings/main_hall_v2_warm_olive.png) — preserved (session 4 mid-iteration lock, retired same session)
+- [assets/hub/mountains.png](assets/hub/mountains.png) — locked session 2
+- [assets/hub/clouds.png](assets/hub/clouds.png) — keyed session 4 (was opaque white, not true RGBA — see session 4 notes)
+- [assets/hub/clouds/cloud_01..08.png](assets/hub/clouds/) — extracted cloud forms (session 4, currently unused in scene)
+- [assets/hub/crowd/*.png](assets/hub/crowd/) — 9 silhouettes, keyed session 4 (true RGBA per drift #23)
 
 ## _archive/ — Obsolete / Reference Only
 

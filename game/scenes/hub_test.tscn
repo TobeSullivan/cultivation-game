@@ -1,0 +1,214 @@
+[gd_scene load_steps=17 format=3 uid="uid://b3yhubtest001"]
+
+[ext_resource type="Texture2D" uid="uid://cwkf4g4vumk44" path="res://assets/hub/mountains.png" id="1_mountains"]
+[ext_resource type="Texture2D" uid="uid://cy1uafb1yrkbx" path="res://assets/buildings/main_hall.png" id="2_main_hall"]
+[ext_resource type="Script" path="res://scripts/drift.gd" id="4_drift"]
+[ext_resource type="Script" path="res://scripts/crowd_bob.gd" id="14_crowd_bob"]
+[ext_resource type="Texture2D" uid="uid://btbax56j55uf4" path="res://assets/hub/crowd/male_topknot.png" id="5_male_topknot"]
+[ext_resource type="Texture2D" uid="uid://c736pnvs2ij5n" path="res://assets/hub/crowd/hooded.png" id="6_hooded"]
+[ext_resource type="Texture2D" uid="uid://gx8gtsbr88li" path="res://assets/hub/crowd/fancy_hat.png" id="7_fancy_hat"]
+[ext_resource type="Texture2D" uid="uid://bnyrap60kblos" path="res://assets/hub/crowd/female_long_hair.png" id="8_female_long_hair"]
+[ext_resource type="Texture2D" uid="uid://8mn5env04qw3" path="res://assets/hub/crowd/female_topknot.png" id="9_female_topknot"]
+[ext_resource type="Texture2D" uid="uid://kogt7ejsysw1" path="res://assets/hub/crowd/hooded_female.png" id="10_hooded_female"]
+[ext_resource type="Texture2D" uid="uid://chr3cbras2r0a" path="res://assets/hub/crowd/large_monk.png" id="11_large_monk"]
+[ext_resource type="Texture2D" uid="uid://hnb2mvh6mf82" path="res://assets/hub/crowd/old_topknot.png" id="12_old_topknot"]
+[ext_resource type="Texture2D" uid="uid://d16yfgwid3f87" path="res://assets/hub/crowd/strong_monk.png" id="13_strong_monk"]
+
+[sub_resource type="Gradient" id="Gradient_sky"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(0.55, 0.72, 0.88, 1, 0.86, 0.92, 0.96, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_sky"]
+gradient = SubResource("Gradient_sky")
+width = 1920
+height = 1080
+fill_to = Vector2(0, 1)
+
+[sub_resource type="Gradient" id="Gradient_mist"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(0.722, 0.769, 0.816, 0.55, 0.722, 0.769, 0.816, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_mist"]
+gradient = SubResource("Gradient_mist")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="HubTest" type="Node2D"]
+
+[node name="Sky" type="TextureRect" parent="."]
+texture = SubResource("GradientTexture2D_sky")
+offset_right = 1920.0
+offset_bottom = 1080.0
+expand_mode = 1
+
+[node name="Mountains" type="Sprite2D" parent="."]
+texture = ExtResource("1_mountains")
+centered = true
+position = Vector2(960, 350)
+scale = Vector2(1.4286, 1.4286)
+
+[node name="MistLayer" type="Node2D" parent="."]
+
+[node name="Mist1" type="Sprite2D" parent="MistLayer"]
+texture = SubResource("GradientTexture2D_mist")
+centered = true
+position = Vector2(400, 800)
+scale = Vector2(3.125, 0.78)
+script = ExtResource("4_drift")
+speed = 4.0
+wrap_min_x = -500.0
+wrap_max_x = 2420.0
+
+[node name="Mist2" type="Sprite2D" parent="MistLayer"]
+texture = SubResource("GradientTexture2D_mist")
+centered = true
+position = Vector2(1100, 850)
+scale = Vector2(3.9, 0.7)
+script = ExtResource("4_drift")
+speed = 6.0
+wrap_min_x = -600.0
+wrap_max_x = 2520.0
+
+[node name="Mist3" type="Sprite2D" parent="MistLayer"]
+texture = SubResource("GradientTexture2D_mist")
+centered = true
+position = Vector2(1600, 780)
+scale = Vector2(2.7, 0.86)
+script = ExtResource("4_drift")
+speed = 9.0
+wrap_min_x = -450.0
+wrap_max_x = 2370.0
+
+[node name="Ground" type="ColorRect" parent="."]
+offset_left = 0.0
+offset_top = 935.0
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0.235, 0.27, 0.32, 1)
+
+[node name="HorizonPlatform" type="ColorRect" parent="."]
+offset_left = 0.0
+offset_top = 895.0
+offset_right = 1920.0
+offset_bottom = 935.0
+color = Color(0, 0, 0, 1)
+
+[node name="MainHall" type="Sprite2D" parent="."]
+texture = ExtResource("2_main_hall")
+centered = true
+position = Vector2(960, 764)
+scale = Vector2(0.45, 0.45)
+
+[node name="CrowdFG" type="Node2D" parent="."]
+script = ExtResource("14_crowd_bob")
+
+[node name="LargeMonk01" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("11_large_monk")
+centered = true
+position = Vector2(150, 1032)
+scale = Vector2(0.12, 0.12)
+
+[node name="MaleTopknot01" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("5_male_topknot")
+centered = true
+position = Vector2(220, 1033)
+scale = Vector2(-0.11, 0.11)
+
+[node name="Hooded01" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("6_hooded")
+centered = true
+position = Vector2(280, 1038)
+scale = Vector2(0.1, 0.1)
+
+[node name="FancyHat01" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("7_fancy_hat")
+centered = true
+position = Vector2(340, 1026)
+scale = Vector2(0.13, 0.13)
+
+[node name="OldTopknot01" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("12_old_topknot")
+centered = true
+position = Vector2(430, 1041)
+scale = Vector2(-0.09, 0.09)
+
+[node name="StrongMonk01" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("13_strong_monk")
+centered = true
+position = Vector2(580, 1035)
+scale = Vector2(0.11, 0.11)
+
+[node name="FemaleLongHair01" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("8_female_long_hair")
+centered = true
+position = Vector2(650, 1023)
+scale = Vector2(0.14, 0.14)
+
+[node name="FemaleTopknot01" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("9_female_topknot")
+centered = true
+position = Vector2(740, 1044)
+scale = Vector2(-0.08, 0.08)
+
+[node name="HoodedFemale01" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("10_hooded_female")
+centered = true
+position = Vector2(850, 1030)
+scale = Vector2(0.12, 0.12)
+
+[node name="MaleTopknot02" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("5_male_topknot")
+centered = true
+position = Vector2(980, 1037)
+scale = Vector2(0.1, 0.1)
+
+[node name="LargeMonk02" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("11_large_monk")
+centered = true
+position = Vector2(1070, 1028)
+scale = Vector2(-0.13, 0.13)
+
+[node name="StrongMonk02" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("13_strong_monk")
+centered = true
+position = Vector2(1130, 1042)
+scale = Vector2(0.09, 0.09)
+
+[node name="Hooded02" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("6_hooded")
+centered = true
+position = Vector2(1210, 1034)
+scale = Vector2(-0.11, 0.11)
+
+[node name="FemaleLongHair02" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("8_female_long_hair")
+centered = true
+position = Vector2(1370, 1038)
+scale = Vector2(-0.1, 0.1)
+
+[node name="OldTopknot02" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("12_old_topknot")
+centered = true
+position = Vector2(1450, 1026)
+scale = Vector2(0.13, 0.13)
+
+[node name="FancyHat02" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("7_fancy_hat")
+centered = true
+position = Vector2(1540, 1045)
+scale = Vector2(-0.08, 0.08)
+
+[node name="HoodedFemale02" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("10_hooded_female")
+centered = true
+position = Vector2(1670, 1034)
+scale = Vector2(-0.11, 0.11)
+
+[node name="FemaleTopknot02" type="Sprite2D" parent="CrowdFG"]
+texture = ExtResource("9_female_topknot")
+centered = true
+position = Vector2(1780, 1021)
+scale = Vector2(0.14, 0.14)

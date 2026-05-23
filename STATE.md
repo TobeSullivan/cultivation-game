@@ -1,139 +1,98 @@
 # State — Cultivation Game
-Last updated: 2026-05-23 (session 3)
+Last updated: 2026-05-23 (session 4 — Claude Code kickoff)
 
 ## Current focus
 
-**Main Hall locked. Three-step asset pipeline locked. Next session = Claude Code, Godot project creation.**
+**Godot project alive. hub_test scene composites the full 6-layer skyline at 1920×1080 with the Main Hall v3 (painterly), 3 animated mist sprites, and an 18-figure crowd FG with bob/shuffle tween. Style coexistence (painterly Main Hall on flat-vector backdrop) is the new live design question, deferred until 2–3 more buildings exist.**
 
-Session 3 closed the first building generation, surfaced drift pattern #23 (Edit Image background removal also bakes checkerboard), and locked the canonical three-step Generate-then-Edit-then-key pipeline with a reusable script. Composite preview confirmed style cohesion. Hub art production unblocked on the remaining 9 buildings, and the engine work that's been gated by "first building must land before Godot setup" can now begin.
+This was the Claude Code kickoff session. Engine work begins. Production parallel track (other 9 buildings in Ludo) can now resume with hub_test as the in-engine validation surface for each new lock.
 
 ## Last session
 
-Hub art session 3, 2026-05-23.
+Hub Godot kickoff, 2026-05-23 (session 4). First session in Claude Code.
 
-**First building generation:**
+**Built:**
 
-- **Three Main Hall attempts** with the cloud-line ground-dodge prompt: "Mortal-era xianxia main hall above the cloud line. Front view, tiled roof, red columns. Painterly hand-painted illustration with visible brushwork."
-- **Style returned flat vector**, not painterly. The "painterly hand-painted illustration with visible brushwork" prompt elements were ignored. User read: this is fine — flat vector harmonizes with the locked flat-vector backdrop layers. The painterly aspiration is retired.
-- Three outputs: (1) Generate New result with clouds, (2) Edit Image "remove clouds" result with blue sky, (3) Edit Image "remove background" result — visually transparent (checkerboard pattern) but file is RGB with checkerboard baked. This was the drift #23 discovery moment.
+- `game/` Godot 4.6.3 project — project.godot configured (1920×1080 / GL Compatibility / linear texture filter), directory structure per tech-stack.md
+- `game/scenes/hub_test.tscn` — 6-layer skyline composite:
+  - Sky: TextureRect + vertical GradientTexture2D (cool blue → pale blue)
+  - Mountains: Sprite2D, y=350, scale 1.43×
+  - MistLayer: 3 Sprite2Ds with programmatic radial GradientTexture2D (#b8c4d0 pale cool grey-blue, normal alpha blend, opacity 0.55, varied sizes 3.125×0.78 / 3.9×0.7 / 2.7×0.86, y-band 780–850), drift via `drift.gd` at 4/6/9 px/sec
+  - Ground: ColorRect dark slate y=935–1080
+  - HorizonPlatform: ColorRect black y=895–935 (40px thick)
+  - MainHall v3 painterly: centered, scale 0.45×, y=764 (bottom flush with platform top)
+  - CrowdFG: 18 silhouettes (9 unique × 2, half horizontally flipped via negative scale.x), baselines y=1075, scales 0.08–0.14, uneven horizontal scatter (left cluster 150–430, mid 580–850, around-building 980–1210, right cluster 1370–1540, far right 1670–1780), bob/shuffle controller attached
+- `game/scripts/drift.gd` — horizontal-drift component with wrap (exports speed, wrap_min_x, wrap_max_x)
+- `game/scripts/crowd_bob.gd` — sparse one-at-a-time weight-shift controller (1.5–5s random interval, asymmetric 1.2s sink + 1.0s recover, SINE ease-in-out, 5px amplitude)
+- `game/scripts/screenshot_and_quit.gd` — dev utility (supports `repo://` path scheme to land outputs in repo root)
+- `tools/extract_cloud_pieces.py` — scipy connected-components for splitting cloud-band PNGs into individual cloud sprites
 
-**Composite preview (one-off, validated then retired as a Claude workflow):**
+**Asset locks landed this session:**
 
-- Stripped checkerboard from image 1 via PIL (gray-detection + brightness threshold + 1px alpha erosion + bbox crop).
-- Composited keyed Main Hall onto locked mountains backdrop.
-- First attempt: building too big (filled frame, dwarfed mountains, edge halos visible). Rejected.
-- Second attempt: building scaled to 40% canvas width, centered, base near bottom. Halos cleaned up by lower brightness threshold + erosion. Composition read as intended: mountains as true parallax background, building as foreground element, sky breathing room above.
-- **User read on the preview:** style cohesion confirmed (both layers flat vector with deep-blue palette — they belong together), the painterly-vs-vector worry was wasted breath. Building scale and platform-line treatment are decisions to make in Godot, not in Claude. Compositing in Claude retired as inefficient — image editors and the Godot scene itself are the right surfaces.
+- **Main Hall v3 painterly** — `assets/buildings/main_hall.png` 1327×613 keyed RGBA. Replaces v1 navy + v2 warm olive (both preserved as `_v1_navy_roof.png` / `_v2_warm_olive.png` for reference). Painterly Studio Ghibli–register includes baked bonsai tree and stone shrine. Style choice retires the session 3 flat-vector-architecture lock — see Open Questions.
+- **9 crowd silhouettes keyed** — passed through `tools/key_out_checkerboard.py`. Now true RGBA, in `game/assets/hub/crowd/`. Dimensions 429–790 wide × 716–768 tall.
+- **clouds.png keyed** — was discovered to have solid white opaque background (not the checkerboard documented session 2). Key script handled it identically. Plus 8 individual cloud forms extracted via the new `extract_cloud_pieces.py`. Currently unused in scene — single-sprite drift exposed sparse-coverage / pixelated-edges issues; user opted to drop clouds from hub_test until better individual-cloud variety lands.
 
-**Pipeline lock:**
+**Process rule established:**
 
-- Drift pattern #23 confirmed: Ludo Edit Image "Remove background" returns RGB with checkerboard baked as pixels, not RGBA. The session 2 lock "Edit Image honors transparency reliably" was visually plausible but file-incorrect.
-- The Generate-then-Edit two-step (session 2 lock) is replaced by **Generate-then-Edit-then-key three-step**:
-  1. Generate New on "white background" or "Pure black figure"
-  2. Edit Image "Remove the background, keep only the figure"
-  3. Programmatic key-out via `tools/key_out_checkerboard.py`
-- Script is reproducible. Sample run on Main Hall image 1 produced canonical asset at `assets/buildings/main_hall.png` (1160×572, true RGBA, cropped to bbox).
-- All 9 remaining buildings will follow the same three-step. All 9 locked crowd silhouettes will need to run through the script too — they were locked session 2 before drift #23 was understood, so they're currently checkerboard-baked, not true RGBA.
+- **Cook-before-code** — propose plan and wait for explicit approval before any Edit/Write/Bash that mutates state. Established mid-session after a cluster of unilateral iterations on hub_test composition burned through tokens. Saved as memory at `~/.claude/projects/C--dev-cultivation-game/memory/feedback_cook_before_code.md`. Now governs all future engine + doc work in this project.
 
-**Main Hall locked:**
+**Python toolchain set up:**
 
-- Canonical asset: `assets/buildings/main_hall.png`
-- Style register: flat vector, deep-blue + red palette, harmonizes with locked backdrop
-- Building base includes baked platform / stairs / balustrade per drift pattern #18
-- Reference 2 anchor for the buildings family — all 9 remaining buildings use locked Main Hall as Reference 2
+- Python 3.12.10 via winget (full path `C:\Users\tobes\AppData\Local\Programs\Python\Python312\python.exe` since not on PATH for the bash subprocess)
+- `pip install Pillow numpy scipy` complete
+- `tools/key_out_checkerboard.py` (existing) + `tools/extract_cloud_pieces.py` (new) both runnable
 
-**Drift patterns added (CLAUDE.md):**
+**Doc updates this wrap:**
 
-- **#23** — Edit Image background removal also returns baked checkerboard, not true RGBA. Mitigation: third pipeline step with `tools/key_out_checkerboard.py`.
-
-**Open questions resolved:**
-
-- **Building visual style register under front-facing skyline** — RESOLVED. Flat vector across the board, validated by composite preview.
-
-**Workflow lesson surfaced:**
-
-- Mechanical compositing (load PNGs, key, scale, paste) is faster in image editors or directly in the target engine. Claude's value is in prompt iteration with Ludo and design reasoning; pixel-pushing previews are the wrong use of the tool. Captured in CLAUDE.md Locked Decisions ("Compositing previews don't happen in Claude").
-
-**Files modified this session (in this wrap):**
-
-- `CLAUDE.md` — Drift pattern #23 added. Three-step Generate-then-Edit-then-key pipeline locked (replaces session 2 two-step). Main Hall locked. Style register resolved (flat vector across all layers). Compositing-previews-not-in-Claude lock added. Pre-code sequencing step 5 updated with session 3 progress. What's Open: building visual style register moved to RESOLVED. Repo structure section updated with `tools/` and `assets/` directories.
-- `tools/key_out_checkerboard.py` — NEW. Reusable script for stripping Ludo's baked checkerboard from Edit Image output.
-- `assets/buildings/main_hall.png` — NEW. Canonical Main Hall asset, true RGBA, ready for Godot import.
-- `STATE.md` — full rewrite (this file).
-
-**Files NOT modified this wrap, pending Claude Code session opening:**
-
-Two docs that need session 3 updates but weren't in context this session. Spec'd below so the Claude Code session can do them as part of orientation:
-
-- `docs/prototype/design-pass.md`:
-  - Asset Pipeline section: update Generate-then-Edit pattern to Generate-then-Edit-then-key three-step. Reference `tools/key_out_checkerboard.py` as the step 3 tool. Cross-reference drift #23.
-  - Prompt-Craft Lessons: add a new lesson on "design-doc voice contaminates tool prompts" if not already there from session 2; add a lesson on three-step pipeline. Style-register-painterly-vs-vector entry: mark resolved (flat vector locked).
-  - Hub asset architecture / Surface 5: Main Hall locked notation, reference to `assets/buildings/main_hall.png`.
-
-- `docs/prototype/asset-inventory.md`:
-  - Style Locks table: art style entry updated (painterly aspiration retired, flat vector across all layers).
-  - Buildings table: Main Hall row marked locked with asset path and dimensions.
-  - Reference 2 anchors table: buildings family Reference 2 = locked Main Hall (`assets/buildings/main_hall.png`).
-  - Production state for crowd silhouette pool: note that the locked 9 figures need to run through `tools/key_out_checkerboard.py` before Godot import (currently checkerboard-baked from session 2 work).
-
-Open-questions.md housekeeping from previous wraps (still deferred): see "Open-questions.md housekeeping" section below.
+- `CLAUDE.md` — repo structure block reflects game/ existence + tools/ contents + assets/ tree; Art Style lock split (backdrop locked flat vector, architecture re-opened); Main Hall entry shows three-version history; Engine entry expanded with Godot project + hub_test + Python toolchain + cook-before-code rule; Pre-code step 6 marked complete; What's Open updated for re-opened style register
+- `PROJECT.md` — game/ section populated; new tools/ section; new assets/ section listing the three Main Hall versions + crowd + clouds
+- `docs/prototype/asset-inventory.md` — Style Locks table updated (architecture register re-opened, three-step pipeline noted, cloud asset-state surprise noted); Backdrop layer stack reflects IN GAME status with hub_test detail; Buildings table Main Hall row updated (LOCKED v3 painterly); Crowd FG section updated (IN GAME with 18-figure composition + bob controller spec); Reference 2 buildings-family entry re-opened
+- `docs/prototype/design-pass.md` — Surface 5 asset ask updated; building visual style register open question re-opened with full session-3-to-session-4 history
+- `docs/open-questions.md` — Hub building layout resolved; new painterly-vs-flat-vector style coexistence open question added; head-only building tier states explicit; new "Resolved 2026-05-23 Session 4 (Claude Code Kickoff)" section with full session summary
 
 ## Next step
 
-**Launch Claude Code from the repo for Godot project setup.**
+Three reasonable directions, user's call:
 
-Workflow:
-1. Unzip this wrap into the repo root.
-2. Commit ("Session 3: Main Hall locked, three-step pipeline, drift #23").
-3. `cd cultivation-game/`
-4. `claude` to launch Claude Code with full context. CLAUDE.md, claude-rules.md, and STATE.md auto-load.
+1. **Continue hub production parallel track.** Generate 1–2 more buildings in Ludo (e.g., Personal Sanctum + Teahouse — both present in the prototype but not yet briefed). Key + drop into hub_test alongside Main Hall. This gives 3 buildings to evaluate the painterly-vs-flat-vector style coexistence question (currently can't be answered with just 1 building in scene). Decision on style coexistence becomes possible after.
 
-**Session opening tasks for Claude Code:**
+2. **Move to a different surface.** Title screen / Character Select / Splash — these are also in prototype scope per design-pass.md. Could build a second test scene to validate the surface-flow patterns (scene transitions, autoload singletons, UI controls). Doesn't gate hub work; gives engine architecture some breadth before going deep on hub.
 
-1. **Two doc cleanups** (spec'd in "Files NOT modified this wrap" above): update `docs/prototype/design-pass.md` and `docs/prototype/asset-inventory.md` with session 3 locks. Same-session housekeeping before engine work begins.
-2. **Open-questions.md cleanup** (deferred from session 2 wrap, see below).
-3. **Create Godot project** in `game/`. Godot 4 with GDScript. Standard project structure (scenes, scripts, assets folders within game/).
-4. **First scene: hub composite test.** Drop the layer stack at real resolution:
-   - Sky: Godot ColorRect or gradient
-   - Mountains: import `mountains.png` from session 2 (assuming it's in the repo — check `assets/backdrop/` or wherever it was placed; if not, user needs to drop it in)
-   - Clouds: import locked clouds asset (same check)
-   - Mist: hand-author in Godot — start with 2-3 sprites, additive blend, slow horizontal drift
-   - Buildings: import `assets/buildings/main_hall.png` (locked this session, true RGBA)
-   - Crowd FG: keying-pending. Run the 9 silhouettes through `tools/key_out_checkerboard.py` first, then import.
-5. **Author platform / horizon line** that the building sits on. This is a Godot-native decision — color, thickness, exact y-position. The line goes above the foreground mountain peaks so mountains read as parallax background, building sits on platform.
-6. **Sample crowd composition.** Drop 1-2 silhouette figures in the FG band at varying scales to validate the three-layer-with-depth read. Sparse bob/shuffle tween authoring deferred until composition reads right.
-7. **Parallax setup.** Mountains slow scroll, clouds horizontal drift, mist slow drift, buildings + crowd static (or very slight parallax). Numbers to iterate.
+3. **Tech-stack build order step 2 — resource class definitions.** Per `docs/tech-stack.md` build order: scaffold the `.gd` files that define Card, Boss, EnemyType, Building, Disciple, SaveData, etc. matching `docs/data/schema.md`. No content yet — just the type definitions. Foundational work that everything else needs eventually.
 
-**Production parallel track:** While engine work is happening, the other 9 buildings can continue being generated in Ludo using the locked three-step pipeline with Main Hall as Reference 2. This is user-side work, doesn't block Claude Code.
+My lean: **#1** while context is fresh. Need at least 2–3 buildings to make a real call on the style coexistence question, and Personal Sanctum is the natural next pick (other head-only, simple geometry, won't fight the current composition). Then style coexistence question becomes actionable.
 
 ## Open questions / blocked on
 
-Full list in `docs/open-questions.md` (cleanup deferred again, see below). Highest leverage for current production:
+Full list in `docs/open-questions.md`. Highest leverage for current production:
 
-- **Head-only building tier states** — Surface 5 vs Art Inventory discrepancy (10 × 2 = 20 vs 18 with two head-only single-state). Carried forward. Not blocking — both Main Hall and Personal Sanctum will get a single locked sprite for now; tier-progression decision can be deferred to a later art pass.
+- **Painterly architecture vs flat-vector backdrop coexistence** (NEW this session) — Main Hall v3 is painterly, mountains + ground + mist + crowd are flat vector. Three resolution paths (regen backdrop / regen buildings / accept cross-style); deferred until 2–3 more buildings let us evaluate at full scene scale.
+- **Head-only building tier states** — Main Hall + Personal Sanctum: single state each, or tier-progressing like specialty buildings? Lower priority than the style coexistence question.
 
-Other open items (not gating Godot session):
-- Economy-side cost curves (own session, post-prototype-art)
-- NG+ design session (post-prototype)
-- 48 path effects (per content design pass)
-- Per-card design pass (96 day-1 cards × per-level content)
-- Full title-ladder pass across all 20 chains
+Engine architecture items that will surface as scope expands:
+- Autoload singletons (GameManager / SaveManager / EventBus / AudioManager) — currently empty placeholders not yet created
+- Resource class definitions (per tech-stack.md build order step 2)
+- Hub interaction model (click hotspots on buildings → modal — not yet implemented)
+- Scene transition patterns (Splash → Title → Character Select → Hub) — not yet wired
 
-## Open-questions.md housekeeping (deferred again to next session opening)
+Other open items unchanged from session 3 wrap — see `docs/open-questions.md`.
 
-Not in context this session. Cleanup needed when next loaded — to be folded into the doc cleanups in the Claude Code session opening:
+## Commit recommendation
 
-**Move to Resolved:**
-- Building isometric vs plate perspective (resolved 2026-05-23 session 2 by architecture pivot)
-- Building visual style register under front-facing skyline (resolved 2026-05-23 session 3, composite preview validated)
-- Hub building layout (resolved session 1, still resolved under skyline)
+This wrap is a clean commit point. Suggested message:
 
-**Add or update:**
-- Head-only building tier states (carried forward, still open, demoted priority — non-blocking)
+```
+Session 4: Godot kickoff + hub_test + Main Hall v3 painterly
 
-**Keep as currently flagged:**
-- All economy-side cost curve items
-- NG+ architecture
-- All previously-flagged content design passes
-- Within-run HP scaling genre divergence (post-playtest revisit)
-- R12 void-aspected elite reuse idea
+- game/ Godot 4.6.3 project bootstrapped
+- hub_test.tscn assembles 6-layer skyline composite (sky/mountains/mist/ground/horizon/building/crowd)
+- drift.gd + crowd_bob.gd + screenshot_and_quit.gd
+- Main Hall iterated v1 navy -> v2 warm olive -> v3 painterly (current lock)
+- 9 crowd silhouettes keyed, 18-figure crowd scatter with bob/shuffle tween
+- tools/extract_cloud_pieces.py (scipy connected-components for cloud split)
+- Cook-before-code rule established
+- Style coexistence (painterly building on flat-vector backdrop) re-opened
+```
+
+Files to add: everything under `game/`, new files under `tools/` and `assets/`, plus doc updates listed above. `.gitignore` already covers `screenshots/`.
