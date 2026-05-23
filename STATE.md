@@ -1,118 +1,139 @@
 # State — Cultivation Game
-Last updated: 2026-05-23 (session 2)
+Last updated: 2026-05-23 (session 3)
 
 ## Current focus
 
-**Hub art production, session 2 closed. Architecture pivot landed.** Iso compound abandoned; front-facing skyline locked. Backdrop layers (mountains + clouds) locked. Crowd FG silhouette pool locked at 9 figures. Production now unblocked on building generation — first test is Main Hall in the new front-facing register.
+**Main Hall locked. Three-step asset pipeline locked. Next session = Claude Code, Godot project creation.**
+
+Session 3 closed the first building generation, surfaced drift pattern #23 (Edit Image background removal also bakes checkerboard), and locked the canonical three-step Generate-then-Edit-then-key pipeline with a reusable script. Composite preview confirmed style cohesion. Hub art production unblocked on the remaining 9 buildings, and the engine work that's been gated by "first building must land before Godot setup" can now begin.
 
 ## Last session
 
-Hub art session 2, 2026-05-23. Heaviest session of the project so far on art workflow discovery and architecture pivots.
+Hub art session 3, 2026-05-23.
 
-**Architecture pivot:**
+**First building generation:**
 
-- **Iso compound → front-facing skyline.** Yesterday's locked iso compound architecture was abandoned after the building-isometric-vs-plate-perspective open question hit and continued Ludo style-consistency failures on iso architecture work. Two compounding problems forced the pivot: (a) Asset-type generations enforce a default isometric angle that didn't match the locked plate; (b) Ludo holds painted style reliably on architecture pieces but drifts to flat vector on landscape-only work. Front-facing skyline composition separates the two via parallax depth layers.
-- **Layer stack locked (6 layers):** sky (Godot-native gradient) / mountains (Ludo, locked) / clouds (Ludo, locked) / mist (Godot-native hand-authored) / buildings (10 individual sprites, TODO) / crowd FG (silhouette pool of 9, locked).
-- **Two style families now coexist** at different depth layers — architecture pieces painterly (TLA family), backdrop landscape flat vector with hard shape gradients. The eye reads them as distinct planes; pivot is the tool-reality split.
+- **Three Main Hall attempts** with the cloud-line ground-dodge prompt: "Mortal-era xianxia main hall above the cloud line. Front view, tiled roof, red columns. Painterly hand-painted illustration with visible brushwork."
+- **Style returned flat vector**, not painterly. The "painterly hand-painted illustration with visible brushwork" prompt elements were ignored. User read: this is fine — flat vector harmonizes with the locked flat-vector backdrop layers. The painterly aspiration is retired.
+- Three outputs: (1) Generate New result with clouds, (2) Edit Image "remove clouds" result with blue sky, (3) Edit Image "remove background" result — visually transparent (checkerboard pattern) but file is RGB with checkerboard baked. This was the drift #23 discovery moment.
 
-**Locks landed:**
+**Composite preview (one-off, validated then retired as a Claude workflow):**
 
-1. **Art style updated** — Hand-painted illustrated 2D, Avatar TLA family. Camera revised to front-facing 2D (not 3/4 angled top-down). Architecture painterly, backdrop flat vector, both accepted as tool-reality split.
+- Stripped checkerboard from image 1 via PIL (gray-detection + brightness threshold + 1px alpha erosion + bbox crop).
+- Composited keyed Main Hall onto locked mountains backdrop.
+- First attempt: building too big (filled frame, dwarfed mountains, edge halos visible). Rejected.
+- Second attempt: building scaled to 40% canvas width, centered, base near bottom. Halos cleaned up by lower brightness threshold + erosion. Composition read as intended: mountains as true parallax background, building as foreground element, sky breathing room above.
+- **User read on the preview:** style cohesion confirmed (both layers flat vector with deep-blue palette — they belong together), the painterly-vs-vector worry was wasted breath. Building scale and platform-line treatment are decisions to make in Godot, not in Claude. Compositing in Claude retired as inefficient — image editors and the Godot scene itself are the right surfaces.
 
-2. **Hub asset architecture redesigned** — Front-facing skyline 6-layer parallax stack. Buildings still individual sprites (drift pattern #18 respected). Population axis redesigned: aggregate FG crowd density instead of per-building NPCs.
+**Pipeline lock:**
 
-3. **Backdrop layers locked** — Mountains (flat vector, deep blues) + Clouds (transparent PNG, white forms with light-blue underlining) both locked from a single compound-scene-then-peel-layers source. Mist deferred to Godot-native hand-authored sprites. Sky deferred to Godot-native gradient.
+- Drift pattern #23 confirmed: Ludo Edit Image "Remove background" returns RGB with checkerboard baked as pixels, not RGBA. The session 2 lock "Edit Image honors transparency reliably" was visually plausible but file-incorrect.
+- The Generate-then-Edit two-step (session 2 lock) is replaced by **Generate-then-Edit-then-key three-step**:
+  1. Generate New on "white background" or "Pure black figure"
+  2. Edit Image "Remove the background, keep only the figure"
+  3. Programmatic key-out via `tools/key_out_checkerboard.py`
+- Script is reproducible. Sample run on Main Hall image 1 produced canonical asset at `assets/buildings/main_hall.png` (1160×572, true RGBA, cropped to bbox).
+- All 9 remaining buildings will follow the same three-step. All 9 locked crowd silhouettes will need to run through the script too — they were locked session 2 before drift #23 was understood, so they're currently checkerboard-baked, not true RGBA.
 
-4. **Crowd FG silhouette pool locked (9 figures):** upright topknot, bowed topknot, ceremonial hat, long-hair tied (low ponytail), long flowing hair female, high-bun female, broad heavyset, pointed hood, cowl hood. All waist-up, back-facing, hands clasped behind back, pure black on transparent. Composition in Godot at runtime (selection / scaling / distribution / sparse bob-shuffle tween).
+**Main Hall locked:**
 
-5. **Generate-then-Edit pattern locked** — Two-step for any transparent-background asset: Generate New on opaque background, then Edit Image to strip background. Generate New doesn't honor "transparent background" in prompts; Edit Image does, reliably.
-
-6. **6 new prompt-craft lessons (#14-19)** — env Reference 1 dominates over subject on figure work, Generate New doesn't honor transparent background, two-step pattern locked, single-tone silhouette can't carry color qualifiers, abstract body-type descriptors need posture anchor, compound-scene-then-peel-layers pattern for multi-layer assets.
+- Canonical asset: `assets/buildings/main_hall.png`
+- Style register: flat vector, deep-blue + red palette, harmonizes with locked backdrop
+- Building base includes baked platform / stairs / balustrade per drift pattern #18
+- Reference 2 anchor for the buildings family — all 9 remaining buildings use locked Main Hall as Reference 2
 
 **Drift patterns added (CLAUDE.md):**
 
-- **#20** — Single-tone silhouette prompts can't carry color qualifiers on features ("Pure black figure" + "long grey beard" = contradiction).
-- **#21** — Environment Reference 1 dominates over figure subject in Generate New; switch to character Reference 1 for figure work.
-- **#22** — Generate New does not honor "transparent background" in the prompt; use Edit Image two-step instead.
+- **#23** — Edit Image background removal also returns baked checkerboard, not true RGBA. Mitigation: third pipeline step with `tools/key_out_checkerboard.py`.
 
 **Open questions resolved:**
 
-- **Building isometric vs plate perspective** — RESOLVED by architecture pivot. Front-facing skyline puts buildings and backdrop on the same camera orientation; perspective mismatch no longer applies.
-- **Hub building layout** — RESOLVED 2026-05-23 session 1 (emergent per-building in Godot). Still resolved under skyline architecture, in fact simpler now.
+- **Building visual style register under front-facing skyline** — RESOLVED. Flat vector across the board, validated by composite preview.
 
-**Open questions added or carried forward:**
+**Workflow lesson surfaced:**
 
-- **Building visual style register under skyline (NEW session 2)** — Open. Backdrop layers locked flat vector. Open: do front-facing buildings come back painterly (like iso compound did) or flatten toward backdrop style? Resolution: first building gen (Main Hall) tests this.
-- **Head-only building tier states** — Still open. Surface 5 vs Art Inventory discrepancy (10 × 2 = 20 vs 18 with two head-only single-state). Skyline pivot doesn't resolve. Lower priority than building style register.
+- Mechanical compositing (load PNGs, key, scale, paste) is faster in image editors or directly in the target engine. Claude's value is in prompt iteration with Ludo and design reasoning; pixel-pushing previews are the wrong use of the tool. Captured in CLAUDE.md Locked Decisions ("Compositing previews don't happen in Claude").
 
-**Generation history this session** (for prompt-craft reference):
+**Files modified this session (in this wrap):**
 
-- First front-facing test (compound w/ pagodas) — painterly hit, but too many buildings in one image
-- Mountain silhouette attempts (3 tries) — all came back flat vector, not painterly. Lesson: empty landscape leaves Ludo too much room; painterly style only holds when architecture anchors it
-- Locked mountain backdrop chosen from batch 1 (wide parallax composition)
-- Edit Image three-pass to peel mountains / mist / clouds layers — all three returned. Mist quality off (looked like sea fog) — deferred to Godot-native. Mountains + clouds locked.
-- Pattern locked: compound-scene-then-peel-layers via Edit Image
-- Crowd FG single-figure pivot — original "crowd band" prompt produced a literal mountain scene of cultivators (env reference absorbed subject)
-- 6 silhouette attempts across 3 prompts — only "hands clasped behind back" reliably produced figure-as-subject. Pattern: concrete posture anchor breaks env-reference dominance
-- Image 1 silhouette locked as base (upright topknot, back-facing)
-- Iterative builds to pool of 9 — ceremonial hat, bowed topknot, long-hair tied (unexpected elder result), long flowing hair female, high-bun female, heavyset, two hoods
-- Bald monk cut (too similar to topknot at silhouette scale); back-facing elder failed twice and dropped
-
-**Files modified this session:**
-
-- `CLAUDE.md` — Drift patterns #20, #21, #22 added. Locked Decisions: art style updated (front-facing + style split), hub asset architecture redesigned, backdrop layers locked, crowd FG silhouette pool locked, Generate-then-Edit pattern locked. Pre-code sequencing step 5 updated. What's Open updated (building isometric resolved, building style register new open, head-only tier states still open).
-- `docs/prototype/design-pass.md` — Surface 5 rewrite (skyline composition). Hub asset architecture section rewrite (6-layer stack, architecture pivot rationale). Building art table rewrite (backdrop layers + crowd FG pool). 6 new prompt-craft lessons (#14-19). Open Questions section update.
-- `docs/prototype/asset-inventory.md` — Style Locks table rewrite. Backdrop layer stack new section. Buildings table update (Main Hall regen pending). Crowd FG silhouette pool new section. Invalidated assets section. Reference 2 anchors updated.
-- `docs/pillars/sect-management.md` — Visual Growth Axis 2 rewrite (per-building NPC → aggregate FG crowd model; old model retained for context).
+- `CLAUDE.md` — Drift pattern #23 added. Three-step Generate-then-Edit-then-key pipeline locked (replaces session 2 two-step). Main Hall locked. Style register resolved (flat vector across all layers). Compositing-previews-not-in-Claude lock added. Pre-code sequencing step 5 updated with session 3 progress. What's Open: building visual style register moved to RESOLVED. Repo structure section updated with `tools/` and `assets/` directories.
+- `tools/key_out_checkerboard.py` — NEW. Reusable script for stripping Ludo's baked checkerboard from Edit Image output.
+- `assets/buildings/main_hall.png` — NEW. Canonical Main Hall asset, true RGBA, ready for Godot import.
 - `STATE.md` — full rewrite (this file).
+
+**Files NOT modified this wrap, pending Claude Code session opening:**
+
+Two docs that need session 3 updates but weren't in context this session. Spec'd below so the Claude Code session can do them as part of orientation:
+
+- `docs/prototype/design-pass.md`:
+  - Asset Pipeline section: update Generate-then-Edit pattern to Generate-then-Edit-then-key three-step. Reference `tools/key_out_checkerboard.py` as the step 3 tool. Cross-reference drift #23.
+  - Prompt-Craft Lessons: add a new lesson on "design-doc voice contaminates tool prompts" if not already there from session 2; add a lesson on three-step pipeline. Style-register-painterly-vs-vector entry: mark resolved (flat vector locked).
+  - Hub asset architecture / Surface 5: Main Hall locked notation, reference to `assets/buildings/main_hall.png`.
+
+- `docs/prototype/asset-inventory.md`:
+  - Style Locks table: art style entry updated (painterly aspiration retired, flat vector across all layers).
+  - Buildings table: Main Hall row marked locked with asset path and dimensions.
+  - Reference 2 anchors table: buildings family Reference 2 = locked Main Hall (`assets/buildings/main_hall.png`).
+  - Production state for crowd silhouette pool: note that the locked 9 figures need to run through `tools/key_out_checkerboard.py` before Godot import (currently checkerboard-baked from session 2 work).
+
+Open-questions.md housekeeping from previous wraps (still deferred): see "Open-questions.md housekeeping" section below.
 
 ## Next step
 
-**First building generation: Main Hall in front-facing skyline register.** This is the first real test of the open question on building style register under skyline architecture — does Ludo come back painterly on front-facing architecture the way it did on iso compound, or does it flatten toward the backdrop style?
+**Launch Claude Code from the repo for Godot project setup.**
 
-Approach: Generate New with character/env Reference 1 (test both, env probably better given subject is architecture), prompt minimal in painter's sketch register (per Lesson 13). Use the locked mountains backdrop as Reference 2 — first time the new backdrop serves as the style anchor for downstream architecture work.
+Workflow:
+1. Unzip this wrap into the repo root.
+2. Commit ("Session 3: Main Hall locked, three-step pipeline, drift #23").
+3. `cd cultivation-game/`
+4. `claude` to launch Claude Code with full context. CLAUDE.md, claude-rules.md, and STATE.md auto-load.
 
-Suggested first prompt to try (subject to iteration):
+**Session opening tasks for Claude Code:**
 
-```
-Front-facing view. Mortal-era xianxia main hall, large tiled roof, weathered red columns. Hand-painted illustration.
-```
+1. **Two doc cleanups** (spec'd in "Files NOT modified this wrap" above): update `docs/prototype/design-pass.md` and `docs/prototype/asset-inventory.md` with session 3 locks. Same-session housekeeping before engine work begins.
+2. **Open-questions.md cleanup** (deferred from session 2 wrap, see below).
+3. **Create Godot project** in `game/`. Godot 4 with GDScript. Standard project structure (scenes, scripts, assets folders within game/).
+4. **First scene: hub composite test.** Drop the layer stack at real resolution:
+   - Sky: Godot ColorRect or gradient
+   - Mountains: import `mountains.png` from session 2 (assuming it's in the repo — check `assets/backdrop/` or wherever it was placed; if not, user needs to drop it in)
+   - Clouds: import locked clouds asset (same check)
+   - Mist: hand-author in Godot — start with 2-3 sprites, additive blend, slow horizontal drift
+   - Buildings: import `assets/buildings/main_hall.png` (locked this session, true RGBA)
+   - Crowd FG: keying-pending. Run the 9 silhouettes through `tools/key_out_checkerboard.py` first, then import.
+5. **Author platform / horizon line** that the building sits on. This is a Godot-native decision — color, thickness, exact y-position. The line goes above the foreground mountain peaks so mountains read as parallax background, building sits on platform.
+6. **Sample crowd composition.** Drop 1-2 silhouette figures in the FG band at varying scales to validate the three-layer-with-depth read. Sparse bob/shuffle tween authoring deferred until composition reads right.
+7. **Parallax setup.** Mountains slow scroll, clouds horizontal drift, mist slow drift, buildings + crowd static (or very slight parallax). Numbers to iterate.
 
-If painted style holds: lock Main Hall, drop into Godot with locked backdrop layers to validate composite at real resolution. This is also the moment the Godot project gets created.
-
-If painted style drifts to flat vector (matches backdrop): decide whether to accept the unified flat-vector treatment across the whole composition, or fight for painted architecture via Edit Image from a known-painted character/architecture source.
-
-After Main Hall lands and the style register question resolves: proceed to the other 9 buildings using locked Main Hall as the per-building style anchor (Reference 2 for buildings family).
+**Production parallel track:** While engine work is happening, the other 9 buildings can continue being generated in Ludo using the locked three-step pipeline with Main Hall as Reference 2. This is user-side work, doesn't block Claude Code.
 
 ## Open questions / blocked on
 
-Full list in `docs/open-questions.md` (cleanup deferred to next session opening — see below). Highest leverage for current production:
+Full list in `docs/open-questions.md` (cleanup deferred again, see below). Highest leverage for current production:
 
-- **Building visual style register under front-facing skyline** — see Next step. First building generation tests this.
-- **Head-only building tier states** — Surface 5 vs Art Inventory discrepancy. Pre-existing, surfaced session 1, still open. Lower priority.
+- **Head-only building tier states** — Surface 5 vs Art Inventory discrepancy (10 × 2 = 20 vs 18 with two head-only single-state). Carried forward. Not blocking — both Main Hall and Personal Sanctum will get a single locked sprite for now; tier-progression decision can be deferred to a later art pass.
 
-Other open items (not gating hub art):
+Other open items (not gating Godot session):
 - Economy-side cost curves (own session, post-prototype-art)
 - NG+ design session (post-prototype)
 - 48 path effects (per content design pass)
 - Per-card design pass (96 day-1 cards × per-level content)
 - Full title-ladder pass across all 20 chains
 
-## Open-questions.md housekeeping (deferred to next session opening)
+## Open-questions.md housekeeping (deferred again to next session opening)
 
-Not in context this session. Cleanup needed when next loaded:
+Not in context this session. Cleanup needed when next loaded — to be folded into the doc cleanups in the Claude Code session opening:
 
 **Move to Resolved:**
 - Building isometric vs plate perspective (resolved 2026-05-23 session 2 by architecture pivot)
+- Building visual style register under front-facing skyline (resolved 2026-05-23 session 3, composite preview validated)
+- Hub building layout (resolved session 1, still resolved under skyline)
 
 **Add or update:**
-- Building visual style register under front-facing skyline (NEW, open)
-- Head-only building tier states (carried forward, still open)
-
-**Already-resolved (carry):**
-- Hub building layout (resolved session 1, still resolved under skyline)
+- Head-only building tier states (carried forward, still open, demoted priority — non-blocking)
 
 **Keep as currently flagged:**
 - All economy-side cost curve items
 - NG+ architecture
 - All previously-flagged content design passes
+- Within-run HP scaling genre divergence (post-playtest revisit)
+- R12 void-aspected elite reuse idea
