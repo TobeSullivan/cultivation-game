@@ -73,7 +73,7 @@ Per-map boss detail for all 8 prototype bosses. Companion to [scope.md](scope.md
 
 ---
 
-## R2 M1 — Sergeant Bao / Iron Ridge Region / Training Hall
+## R2 M1 — Warden Bao / Iron Ridge Region / Training Hall
 
 **Boss identity:** Hard-bitten drill instructor from a hill garrison, taught generations of mortal soldiers how to push past their limits.
 
@@ -101,7 +101,7 @@ Per-map boss detail for all 8 prototype bosses. Companion to [scope.md](scope.md
 3. Targets: 5 elites
 4. Territory: 65% paint
 5. Resources: gather 80 iron ore
-6. Boss: defeat Sergeant Bao
+6. Boss: defeat Warden Bao
 
 **Region-themed resource:** iron ore (Earth-themed, Tier 1).
 
@@ -115,7 +115,7 @@ Per-map boss detail for all 8 prototype bosses. Companion to [scope.md](scope.md
 
 **Signature technique:** *Brass Ledger* — Metal Orbital, Body-variant. Four small floating ledger-tablets rotating around the player's torso, standard orbital contact damage.
 
-**Off-recipe evolution:** *Edict of Many Blades* — tablets double to 8, rotation speed increases, tablets occasionally fling outward at distant enemies before returning.
+**Off-recipe evolution:** *Ledger of Many Blades* — tablets double to 8, rotation speed increases, tablets occasionally fling outward at distant enemies before returning.
 
 **Evo-partner passive:** *Bound Records* — Metal Utility, Body-variant. +X% pickup radius. Each pickup grants stacking +Y% Orbital damage buff for 4 sec (max 10 stacks).
 
@@ -134,10 +134,10 @@ Per-map boss detail for all 8 prototype bosses. Companion to [scope.md](scope.md
 2. Kills: 380 enemies
 3. Targets: 5 elites
 4. Territory: 70% paint
-5. Resources: gather 80 sealed scrolls
+5. Resources: gather 80 brass tablets
 6. Boss: defeat Steward Mei
 
-**Region-themed resource:** sealed scrolls (Metal-themed, Tier 1).
+**Region-themed resource:** brass tablets (Metal-themed, Tier 1).
 
 ---
 
@@ -247,7 +247,7 @@ Per-map boss detail for all 8 prototype bosses. Companion to [scope.md](scope.md
 
 ---
 
-## R3 M3 — Forge-Lord Tian / Frostforge Kingdom / Soul Forge (R3 Realm-Final, Prototype Capstone)
+## R3 M3 — Smith Tian / Frostforge Kingdom / Soul Forge (R3 Realm-Final, Prototype Capstone)
 
 **Boss identity:** Smith who works only at the highest mountain forge where the air freezes the breath but his hammer never cools. Forges souls into steel; his enemies are tempered by their own destruction.
 
@@ -278,6 +278,6 @@ Per-map boss detail for all 8 prototype bosses. Companion to [scope.md](scope.md
 3. Targets: 7 elites
 4. Territory: 75% paint
 5. Resources: gather 110 frost-iron ingots
-6. Boss: defeat Forge-Lord Tian
+6. Boss: defeat Smith Tian
 
 **Region-themed resource:** frost-iron ingots (Ice-themed, Tier 2).

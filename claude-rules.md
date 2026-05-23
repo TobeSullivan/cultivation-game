@@ -146,7 +146,11 @@ Audits are user-initiated. They never happen as part of normal wrap.
 
 **Surgical edits when Claude is the editor.** If Claude has direct file-editing tools (`str_replace`, MCP write tools, etc.), use them. Don't rewrite a 500-line file to change 3 lines.
 
-**Delivery mechanism is a rounding error in cost.** The expensive part of writing is generating the content; whether it goes via zip-and-script, direct MCP write, or copy-paste makes a negligible token difference. Choose the mechanism based on operational fit, not token math.
+**Edit-don't-rewrite holds even when the deliverable is a full file.** When the workflow requires a complete file as the final artifact (e.g., a zip the user unzips and overwrites with), the editing path is still: copy source into working dir → str_replace the changing sections → bundle. The final artifact is complete; generation cost is proportional to what changed, not to file size. Regenerating an unchanged 90% of a 30k-token file is an order of magnitude more output tokens than the str_replace path.
+
+**If the file you're editing isn't in context, ask before doing anything else.** Don't reconstruct from memory. Don't proceed without it. The cost of asking is one short turn; the cost of a rewritten-from-scratch file with subtle errors — and the wasted output tokens to produce it — is large.
+
+**Delivery mechanism is a rounding error in cost.** The expensive part is *generating* the content (governed by the rules above); whether it then goes via zip, direct MCP write, or copy-paste is negligible. Choose delivery based on operational fit, not token math.
 
 ---
 

@@ -41,8 +41,6 @@ No badges, no red dots.
 - Stage breakthroughs (Major, 12)
 - Era transitions (Major, 5)
 - New cycle learnable (Medium, 8)
-- Qi pool cap +tier (Minor)
-- Inspiration drop rate +tier (Minor)
 - Cycle cap-climb tiers (Minor)
 
 **From risk map:**

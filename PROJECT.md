@@ -37,6 +37,7 @@ One-line map of what exists in the repo. Updated when files are added/moved/remo
 ### docs/prototype/ — R1–R3 Build Target
 
 - [docs/prototype/scope.md](docs/prototype/scope.md) — 8 maps overview, adjacency, building unlock order, difficulty curve
+- [docs/prototype/design-pass.md](docs/prototype/design-pass.md) — surface, art, audio, pipeline inventory for shippable prototype
 - [docs/prototype/bosses.md](docs/prototype/bosses.md) — full per-map boss detail (identity, biome, signature, combat, objectives)
 - [docs/prototype/rewards.md](docs/prototype/rewards.md) — per-objective rewards, forward-shift derangement, per-map quantities
 

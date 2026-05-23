@@ -52,7 +52,7 @@ Formulas:
 | R1 M1 Yun | 200 essence | 200 qi | 20 T1 mixed | 30 Wood T1 (bamboo) | tech + 5 stones |
 | R1 M2 Pao | 240 | 280 | 28 T1 mixed | 32 Water T1 (reagents) | tech + 15 stones + insp shard |
 | R2 M1 Bao | 390 | 350 | 52 T1 mixed | 50 Earth T1 (iron ore) | tech + 5 stones |
-| R2 M2 Mei | 420 | 380 | 52 T1 mixed | 52 Metal T1 (scrolls) | tech + 5 stones |
+| R2 M2 Mei | 420 | 380 | 52 T1 mixed | 52 Metal T1 (brass tablets) | tech + 5 stones |
 | R2 M3 Hong | 450 | 420 | 63 T1 mixed | 52 Fire T1 (writs) | tech + 15 stones + insp shard |
 | R3 M1 Wen | 640 | 450 | 84 T2 mixed | 70 Lightning T2 (manuscripts) | tech + 5 stones |
 | R3 M2 Lin | 640 | 460 | 84 T2 mixed | 72 Wind T2 (feathers) | tech + 5 stones |
@@ -61,3 +61,26 @@ Formulas:
 **Mixed-theme bundles** split equally across the 8 elementals (Wood/Earth/Fire/Water/Metal/Wind/Ice/Lightning). E.g., 20 T1 mixed ≈ 2.5 of each elemental T1 theme.
 
 **Full R1–R3 banked haul:** ~3,700 essence + ~3,140 raw qi + ~215 T1 mixed + ~266 T2 mixed materials + region-themed caches + ~85 spirit stones + 3 inspiration shards + 16 cards (8 techniques + 8 partner passives) + 8 named disciple recruits + all 8 buildings unlocked at T1.
+
+---
+
+## Run-Start Screen UI Requirements (Locked 2026-05-22)
+
+The card selection screen surfaced before each run. Pool size: 96 day-1 → ~444 endgame. UI must scale across that growth without becoming unbrowsable. Layout is screen-design work and defers to the UI pass; the requirements below are the constraint sheet.
+
+### Requirements
+
+- **Primary filter: theme.** 12 theme tabs (Wood / Earth / Fire / Water / Metal / Wind / Ice / Lightning / Shadow / Spirit / Star / Void). Average ~37 cards per tab at endgame.
+- **Secondary filter: archetype.** Within a theme tab, 8 archetype sub-filters (Strike / Projectile / Orbital / Zone / Vitality / Utility / Offense / Special). Average ~5 cards per theme × archetype cell at endgame.
+- **Favorites pin row.** Player can pin cards to a row that displays above the theme tabs. Pin/unpin from card detail. Useful for recurring loadouts at endgame.
+- **Search box.** Free-text by card name. Visible at all times, top-right.
+- **Card preview pane.** Selecting (not picking) a card shows: L1 stats, evolution partner (if discovered), paths the card belongs to (if discovered), Forge enhancement level if any.
+- **Browse-to-pick target: under 30 seconds at endgame.** This is the UX bar the layout must clear.
+
+### Behavior
+
+- The player's "most recent run-start pick" is preselected when the screen opens. Reduces friction for the common case of repeating a loadout.
+- Locked / undiscovered cards are not shown at all on this screen (no greyed-out teasing).
+- Theme tabs gray out if zero cards in pool — won't happen post-day-1 since starter pool is 12 themes × 8 cards, but the rule is defensive against future content reorganizations.
+
+UI layout, animation, and platform-specific input (controller focus, mobile touch targets) are deferred to the prototype UI pass. Cross-surface controller focus state requirement applies here — covered in CLAUDE.md.

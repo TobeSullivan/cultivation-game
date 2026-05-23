@@ -73,6 +73,27 @@ Partner passive distribution across the 8 prototype maps uses **forward-shift de
 
 ---
 
+## Chain Progression Rules
+
+**Chain prerequisite (natural gate, not exotic).** The Nth specialist in any building chain requires recruiting all 1..N-1 prior. You cannot unlock the 5th Brewer without already having the 4th. This is a structural recruitment prereq, distinct from the exotic-gating system, and the player adapts to it intuitively.
+
+**Exotic-gate clarification.** Bosses who **first unlock** a building, or who are **realm-finals**, are never exotic-gated. Other chain-progression bosses (including R12 building-chain capstones) may be exotic-gated *in addition to* the chain prereq.
+
+**Title ladder.** Chain titles should climb. Chain-entry specialists (rating 5, first to unlock a building) sit on the low rung — bare-craft or low-authority titles (e.g., *Smith*, *Warden*, *Brewer*). Mid-chain titles escalate. The R12 chain capstone reads as the master who taught everyone — the highest title rung the chain offers. Examples of usable ladders:
+
+| Chain | Low | Mid | R12 capstone |
+|---|---|---|---|
+| Smith | Smith | Forgemaster | Forge-Lord / Anvil-Sage |
+| Trainer | Warden | Marshal | Grand Marshal / Warlord |
+
+Full ladder per chain (8 building + 12 theme) deferred — see open-questions.
+
+**Title ceiling implications.** Where current R1–R3 prototype names already sit at mid-rung at rating 5 (*Master Pao*, *Magistrate Hong*), the chain-capstones above them at R12 must clear those ceilings. Narrative cover exists (*Master* is a brewer-craft convention; Hong is a "magistrate-king") but the constraint is worth tracking during the full title-ladder pass.
+
+**R12 chain capstone "evolution" effect.** The R12 capstone in each building chain should do something special on defeat — an evolution-style payoff that marks the chain conclusion. Specific mechanic deferred — see open-questions.
+
+---
+
 ## The 12 Realm-Final Headliners
 
 The realm-final boss roster from v4 remains, but **their themes are now free design choices** rather than realm-mandated. Building-trigger finals (R1 Brewer, R2 Administrator, R3 Smith) keep their specialties. The 9 non-building-trigger finals' themes are open.
@@ -124,14 +145,14 @@ All 8 defeat-gated. Every system online by end of R3.
 Deterministic triggers; never RNG. Always-join (decline not offered).
 
 Roster structure carried forward from v4:
-- 4 reputation thresholds
+- 4 Sect Power thresholds
 - 4 achievement-driven
 - 3 region-specific
 - 4 Grand Master
 - 3 Relationship
 - 2 composite
 
-Specific triggers TBD.
+Specific triggers TBD. Constraint: triggers are deterministic (never RNG), not reputation-based (reputation isn't a mechanic in this game), and not building-tier-tunable.
 
 ---
 

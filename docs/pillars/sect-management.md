@@ -76,16 +76,74 @@ Plus: Recruitment gate (property of how the player got them, not a stat).
 
 - All specialists default-home to their specialty's building
 - One Master per building; player designates; free and instant to swap
-- **Building Tier Unlock Rule (v6):** Master's starting rating IS the tier ceiling the building can reach with that specialist. Pao at rating 5 → Teahouse purchasable up to T5. Lin (Heaven-Reader exception) at rating 7 → Pavilion up to T7. Recruiting a higher-rated specialist of the same family extends the ceiling.
-- **Tier count per building:** = max rating achievable in that specialty's arc. For most building specialties (6-member arc, ratings 5→10), buildings reach T1–T10. For Heaven-Reader's short arc (3–4 members), Pavilion likely reaches T1–T9 to T1–T10 depending on arc length decision.
+- **Building Tier Unlock Rule (v6):** Master's starting rating IS the tier ceiling the building can reach with that specialist. Pao at rating 5 → Teahouse purchasable up to T5. Recruiting a higher-rated specialist of the same family extends the ceiling.
+- **Tier count per building:** = max rating achievable in that specialty's arc. For most building specialties (6-member arc, ratings 5→10), buildings reach T1–T10. Heaven-Reader's 4-member arc (ratings 7→8→9→10) also reaches T1–T10.
 - **Specialist count drives visual building growth** independent of tier. Pao alone = tiny tea hut. 6 Brewers = full tea complex. T1 + 6 specialists = sparse-but-populated; T6 + 1 specialist = expanded-but-empty.
 - **Master amplification model:**
-  - **Compounding buildings** (Recruitment, Storehouse, Library, Training, Outer Court, Pavilion): all specialists at the building amplify all unlocked surfaces collectively. Formula: `compound rate = base × (1 + Σ(specialist ratings) × coefficient)`. Master = narrative.
+  - **Compounding buildings** (Recruitment, Storehouse, Library, Training, Outer Court, Pavilion): all specialists at the building amplify all unlocked surfaces collectively. Formula: `compound rate = base × (1 + Σ(specialist ratings) × 0.10)`. The 0.10 coefficient is universal across compounding buildings; per-building tuning may diverge during playtest. Master = narrative.
   - **Flat-cap buildings** (Teahouse, Soul Forge): each upgrade track can have ONE specialist assigned. Per-level output = `base × max(rating_assigned, 1)`. Master picks lead track first.
-- Apprentices contribute supplementary effect on Master's terms
-- Buildings grow visually with specialist count and tier
+- Apprentices contribute to the compounding sum via their ratings; flat-cap buildings have no separate apprentice term
+- Buildings grow visually with specialist count and tier (see Visual Growth below)
 
 Detailed tier curves and per-building surface tables live in [systems/building-tier-curves.md](../systems/building-tier-curves.md).
+
+---
+
+## Visual Growth — Two Independent Axes
+
+Buildings communicate progression visually through two orthogonal axes. Both run simultaneously.
+
+### Axis 1 — Tier (drives base art)
+
+Three base-art stages per building, keyed to the three tier surfaces:
+
+- **T1 stage** — building's initial form (small, simple)
+- **T4 stage** — refined form (expanded scope, new structural elements)
+- **T8 stage** — grand form (full realization of the building's mature identity)
+
+Tier breakthroughs at T1/T4/T8 trigger the visual upgrade. Tiers between (T2/T3, T5/T6/T7, T9/T10) share the base art of the most recent milestone — internal upgrades show as overlay flair (gilding, lanterns, banners) without requiring new base sprites.
+
+**Prototype scope:** R1–R3 caps buildings at T5 (T7 for Pavilion). Prototype players see T1 + T4 visual stages only. T8 art is post-prototype work.
+
+**Asset implication:** 10 buildings × 3 tier stages = 30 base building images full game. Prototype = 20 base images (T1 + T4 across 10 buildings).
+
+### Axis 2 — Specialist count (drives dynamic overlay)
+
+Specialist count grows the sect visually through dynamic Godot-side overlays, composed at runtime. **The implementation differs by hub architecture context — original per-building NPC overlay model was redesigned 2026-05-23 session 2 with the front-facing skyline pivot.**
+
+**Current model (front-facing skyline, 2026-05-23 session 2 onward):**
+
+- **Aggregate foreground crowd silhouette layer** — sect population is expressed as a foreground band of cultivator silhouettes facing the sect, in front of the building layer. Density, count, and figure variety scale with sect population.
+- **Pool of 9 unique silhouettes** locked (variants on top-of-head, body mass, posture). Crowd composition in Godot draws from this pool, distributes across the FG band, applies sparse bob/shuffle tween (1-2 figures shifting weight every few seconds).
+- **Per-building atmospheric overlays** (lit windows, particles) still apply at the per-building sprite level for building-specific activity reads.
+- Drift pattern #18 still respected — buildings remain separable sprites with anchor points and click hotspots. Population is just expressed aggregate-style rather than per-building NPC.
+
+**Original model (iso compound, abandoned 2026-05-23 session 2):**
+
+- Per-building NPC sprites walking individual building grounds, count scaling per-building with specialist count. Was abandoned with the architecture pivot — front-facing skyline doesn't support per-building ground space the way iso compound did, and aggregate FG crowd reads more legibly for sect-size at a glance.
+
+**Per-building activity overlays (both models):**
+
+- **Lit windows / lanterns** — number lit scales with population at that building
+- **Ambient particles** — smoke from chimneys, qi wisps, dust on training grounds; intensity scales with activity
+- **Subtle lighting changes** — busier buildings glow warmer
+
+This means **"Pao alone = tiny tea hut, 6 Brewers = full tea complex"** is delivered through:
+- Tier-driven base art (building size and complexity)
+- Per-building atmospheric overlays (lit windows, glow intensity, particles)
+- Aggregate FG crowd density (sect-wide population read)
+
+**Asset implication:** 9 crowd FG silhouettes locked + 5–6 atmosphere overlay assets (particles + lighting textures). All composable in Godot at runtime; no asset explosion.
+
+### Combined matrix
+
+| | 1 specialist | 3–4 specialists | 6+ specialists |
+|---|---|---|---|
+| T1 base art | Sparse + small | Populated + small | Bustling + small |
+| T4 base art | Sparse + expanded | Populated + expanded | Bustling + expanded |
+| T8 base art | Sparse + grand | Populated + grand | Bustling + grand |
+
+Player visual reading: tier = "how built up is this place" / specialist count = "how busy is this place." Both axes always true.
 
 ---
 
@@ -126,34 +184,40 @@ Detailed tier curves and per-building surface tables live in [systems/building-t
 
 **Tier visibility is realm-gated.** Entering Realm N reveals tiers gated to Realm N across unlocked buildings.
 
-Most buildings hold **~3 distinct functions**. The player learns each building as a place where specific kinds of work happen.
+Most buildings hold **~3 distinct functions**. The player learns each building as a place where specific kinds of work happen. **For compounding buildings, the three functions correspond to the three tier surfaces (T1, T4, T8) in [systems/building-tier-curves.md](../systems/building-tier-curves.md).** UI features that live at a building (Codex at Library, Sect Power widget at Main Hall) are noted separately and don't count as functions.
 
 | # | Building | Run By (Master) | What it holds |
 |---|---|---|---|
 | 1 | **Main Hall** | Head only | Hub. Sect Power widget. Navigation to all other buildings. |
 | 2 | **Personal Sanctum** | Head only | (a) Meridian refinement, (b) cycling assignment + switching, (c) tier and stage breakthroughs |
-| 3 | **Recruitment Hall** | Charisma Master | (a) Generic population generation (at currency cost), (b) special-event recruit arrivals, (c) recruitment lead processing (region-sourced wandering cultivator events) |
-| 4 | **Training Hall** | Trainer Master | (a) Sect Cap (set by highest trainer), (b) generic tier climb (via trainer throughput), (c) named-disciple student slots (tier + Specialty Rating climb) |
+| 3 | **Recruitment Hall** | Charisma Master | (a) Generic recruit tick rate, (b) amount per tick, (c) cost reduction / qi yield per recruit. *Special-event recruit arrivals also happen here — non-scaling, triggered by external conditions, not a tier surface.* |
+| 4 | **Training Hall** | Trainer Master | (a) Generic tier climb throughput, (b) named-disciple student slot effectiveness, (c) new generic starting stage (floor). *Sect Cap is set separately by the Ceiling Cascade rule below — it's a consequence of trainer assignments, not a tier-scaling surface.* |
 | 5 | **Storehouse** | Organizer Master | (a) Idle resource cap, (b) run chest size cap, (c) run skip/reroll/banish charges |
 | 6 | **Teahouse** *(Realm 1, foundational)* | Brewer Master | (a) Sect-wide cultivation buffs (in-service tea), (b) run buffs (atk/def/pickup/paint), (c) recipe collection (unlockable brews from materials) |
 | 7 | **Soul Forge** | Smith Master | (a) Technique upgrades, (b) passive upgrades, (c) discovered-path strengthening |
-| 8 | **Outer Court / Farmlands** | Administrator Master | (a) Pop cap multiplier, (b) sect-wide passive bonuses, (c) reputation/influence generation (feeds rep-threshold special-event recruits) |
-| 9 | **Library** | Scholar Master | (a) Head's cultivation speed, (b) path Codex (browsable progress), (c) cycle upgrades (climb each unlocked cycle toward its cap) |
-| 10 | **Ascension Pavilion** | Heaven-Reader Master | (a) Inspiration drop rate, (b) qi pool cap, (c) realm transition ceremonies |
+| 8 | **Outer Court / Farmlands** | Administrator Master | (a) Sect-wide building upgrade cost reduction passive, (b) named disciple placement BIS amplification (yield boost when named assigned to region/building), (c) pop cap multiplier |
+| 9 | **Library** | Scholar Master | (a) Head's cultivation speed, (b) region material drop rate, (c) generic disciple qi rate (sect-wide) |
+| 10 | **Ascension Pavilion** | Heaven-Reader Master | (a) Qi accumulation speed, (b) tier breakthrough speed, (c) cycling technique upgrades (flat-cap T8). *Realm transition ceremonies happen at Pavilion as flavor/UX, not a tier-scaling surface.* |
 
 ### Soul Forge — Three Upgrade Tracks
 
-1. **Techniques** — individual run technique upgrades
-2. **Passives** — individual passive upgrades
-3. **Paths** — discovered path-tier strengthening (Sapling → Worldroot effects per theme)
+1. **Techniques (T1)** — individual run technique upgrades. One Forge track per card-family (base + evolved chained). Base levels 1–10 unlock first; +1 = +10% effectiveness; max +10 = +100%. Once base is at +10, the evolved form's track unlocks. Evolved levels 1–10 stack on inherited base — evolved +10 = +200% effectiveness on the evolved form. Investment never evaporates: the base +100% keeps applying every future run base is drafted.
+2. **Passives (T4)** — individual passive upgrades. One Forge track per passive card. +1 = +10% effectiveness; max +10 = +100%. Independent tracks, no inheritance chain.
+3. **Paths (T8)** — discovered path-tier strengthening. One Forge track per discovered path tier (Wood Sapling is one track, Wood Sprout is another, etc.). +1 = +10% to that tier's effect; max +10 = +100%. No inter-tier unlock gating. What +10% scales per effect is a designer call (heal amount for Wood Sapling, crit chance for Metal Sapling, explosion damage/radius for Fire Sapling, etc.) — flagged for the 48-path-effect design pass.
 
-Path upgrades work per-discovered-tier. Upgrading the Wood Path lifts ALL discovered Wood tiers proportionally.
+Forge surfaces populate dynamically — only discovered techniques, passives, and path tiers appear as upgrade tracks. As the pool grows through play, the Forge surfaces grow with it.
 
 Forge purchases fire Minor unlocks like all other building purchases — silent "new" indicator on the building screen, no popup.
 
-### Library — Cycle Upgrades
+**Scaling math interaction.** Forge stacks multiplicatively with Teahouse buffs (sect-wide + run), run-internal card draft level 1–8, Sect Power multiplier, and Path tier effects. A full scaling pass is flagged as follow-up (see [docs/open-questions.md](../open-questions.md)) — target curve is VS / Brotato / HoT tension in R1–R3 climbing to dopamine-explosion power in R10–R12.
 
-The Library hosts cycle upgrades. A newly-learned cycle starts at ~30% of its cap; Library tier upgrades climb each unlocked cycle toward its full cap. The Library's other two jobs (head cultivation speed, path Codex) remain.
+### Library — Path Codex
+
+The Path Codex (browsable path progress, recipe hints for partially-discovered paths, lore entries) is a UI feature that lives at Library. It is **not** a tier-scaling function — the Codex UI is the same at Library T1 and T10. Library's three tier surfaces are the three functions listed in the table above.
+
+### Cycle Upgrades — At Pavilion T8
+
+Cycle upgrades live at Ascension Pavilion T8 (flat-cap surface). A newly-learned cycle starts at ~30% of its cap; Pavilion T8 upgrades climb each unlocked cycle toward its full cap. See [pillars/cultivation.md](cultivation.md) and [systems/building-tier-curves.md](../systems/building-tier-curves.md).
 
 ### Teahouse — Foundational Food Building
 

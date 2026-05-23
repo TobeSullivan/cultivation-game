@@ -33,7 +33,7 @@ Era names are placeholders.
 - **8 cycling techniques total in the entire game.** Each is a distinct circulation pattern through some number of meridians.
 - **Only one cycle active at a time.** Switching is free and instant.
 - **Meridian count gates access.** More refined meridians = more shapes accessible.
-- **Each cycle has a cap.** Forge upgrades climb a cycle toward its cap.
+- **Each cycle has a cap.** Pavilion T8 upgrades climb a cycle toward its cap.
 - **Head-only mechanically.** Disciples do not run cycles in any way that affects the game.
 
 ### The 8 Cycles
@@ -55,16 +55,62 @@ Meridian pacing (5th end-R3, 6th end-R5, 7th end-R7, 8th end-R10) means the requ
 
 Cycle effects are pure qi-gathering-rate bonuses. No archetypes, no theme bonuses.
 
-**Cycle upgrades happen at the Library** (not Soul Forge). A newly-learned cycle starts at ~30% of its cap. Library tier upgrades climb each known cycle toward its cap.
+**Cycle upgrades happen at the Ascension Pavilion T8** (flat-cap surface, see [systems/building-tier-curves.md](../systems/building-tier-curves.md)). A newly-learned cycle starts at ~30% of its cap. Pavilion T8 upgrades climb each known cycle toward its full cap.
+
+---
+
+## Meridian Refinement
+
+Meridians refine at the Personal Sanctum. Refinement is non-combat, ceremonial.
+
+**Pacing (locked):**
+
+| Refinement | Triggered | Material tier | Currency gates |
+|---|---|---|---|
+| 5th meridian | end-R3 | T2 (any theme) | Essence |
+| 6th meridian | end-R5 | T3 (any theme) | Essence |
+| 7th meridian | end-R7 | T4 (any theme) | Essence + Spirit Stones |
+| 8th meridian | end-R10 | T5 (any theme) | Essence + Spirit Stones (large) |
+
+**Notes:**
+- "Any theme" — refinement accepts any of the 12 themed materials at the required tier, consistent with the unified materials rule in [systems/economy.md](../systems/economy.md)
+- Material tier maps to realm pair (R1–R2=T1, R3–R4=T2, etc.); refinement uses the tier of the realm at which it triggers
+- Spirit stones gate the 7th and 8th refinements as part of the "high-meridian refinement" stone sink locked in economy.md
+- Specific quantities (material counts, essence amounts, stone counts) are tuning placeholders — refined during build/playtest
 
 ---
 
 ## Qi Pool
 
-- Qi pool fills via idle generation (Sect Power-driven), run-derived input (monster cores + enemy essence), and cycling multiplier
+- Qi pool fills via idle generation (Sect Power-driven, from conquered regions), run-derived input (raw qi from enemy kills), and cycling multiplier
 - Pool **caps**; player must "hit the button" to advance a tier
 - Qi never decays or is lost
 - Each stage requires 3 full cycles to be ready for stage breakthrough
+
+### Pool Cap is Inherent to Current Stage
+
+The qi pool cap is **NOT a tunable building surface**. It is an inherent property of the player's current cultivation stage. Within a stage, the cap stays fixed — fill it three times via the cycling cadence to be stage-ready. The cap only rises when the player breaks through to the next stage.
+
+This was deliberately locked: cycling is the "fill three times to advance" mechanic; making the cap upgradeable would only add friction without changing the cadence.
+
+**Cap curve:** `cap(stage) = 1,000 × 2^(stage-1)`
+
+| Stage | Pool cap |
+|---|---|
+| 1 | 1,000 |
+| 2 | 2,000 |
+| 3 | 4,000 |
+| 4 | 8,000 |
+| 5 | 16,000 |
+| 6 | 32,000 |
+| 7 | 64,000 |
+| 8 | 128,000 |
+| 9 | 256,000 |
+| 10 | 512,000 |
+| 11 | 1,024,000 |
+| 12 | 2,048,000 |
+
+Doubling matches the AdCap shape — idle qi output across realms climbs ~2.4× per realm (per [risk-map.md](risk-map.md)), so cap-fill time stays roughly constant across stages. The "fill three times" cadence holds at every era.
 
 ---
 
@@ -87,8 +133,7 @@ Small ceremonies. Click-to-advance once requirements are met.
 
 ## Inspiration
 
-- Drops only from **bosses** ("strong opponents")
-- Specifically map-final and realm-final bosses drop *some* of them
+- Drops only from **realm-final bosses** (first-time defeat only)
 - Cannot be banked ahead (realm gating prevents access to higher-stage inspiration outside cultivation reach)
 - Self-regulating progression gate
 
@@ -108,3 +153,4 @@ Small ceremonies. Click-to-advance once requirements are met.
 - **Cultivation gates realm progression.** Stage X required to enter Realm X.
 - **Realm progression does NOT gate cultivation.** (Patient player could max cultivation in R1 in theory.)
 - **EXCEPT** — once stage 4+ requires inspiration, you must engage with the appropriate realm.
+- **Additionally** — advancing to the next realm requires defeating the current realm's final boss (see [risk-map.md](risk-map.md)). Map completion = all 6 objectives banked, and boss is objective #6.

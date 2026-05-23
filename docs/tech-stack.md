@@ -218,6 +218,24 @@ When new images come back from Ludo, they go here:
 - Boss: `yun_idle.png`, `yun_walk.png`, etc.
 - Enemy: `fodder_bandit.png`, `fodder_spirit.png`, etc.
 - Environment: `bamboo_ground_tile.png`, `bamboo_stalk.png`, etc.
+- **Tier-state variants on buildings:** `_t1`, `_t4`, `_t8` suffix. Example: `teahouse_t1.png`, `teahouse_t4.png`, `teahouse_t8.png`. Intermediate tiers reuse the most recent milestone base.
+- **Sprite sheets (multi-frame animations):** `_sheet` suffix. Example: `player_walk_sheet.png` for the walk-cycle sprite sheet, `player_idle.png` for a single-frame static image.
+- **Cards:** `card_<theme>_<name>.png` for base, `card_<theme>_<name>_evolved.png` for evolved variant. Example: `card_wood_vine_whip.png` / `card_wood_vine_whip_evolved.png`.
+
+---
+
+## Ludo Reference Workflow — Locked
+
+Every Ludo generation uses two references attached, in this order:
+
+- **Reference 1: Style anchor** — Avatar TLA character lineup screenshot. **Never changes.** This locks the cel-shaded ink-outline manhua-anime register across the entire production.
+- **Reference 2: Subject anchor** — rotates based on what's being generated:
+  - Generating a character → locked character of that family (or locked MC for sect head presets)
+  - Generating a building → first locked building (preserves style consistency across the hub)
+  - Generating a card → locked card frame + the item visual
+  - Generating VFX / environment → first locked piece in that category
+
+**Hard rule:** never generate without both references attached. This prevents style drift over long pipelines. The reference set is canonical and version-pinned. Reference images live in `res://assets/_references/` (dev-only, excluded from export builds).
 
 ---
 
@@ -251,9 +269,41 @@ Each step is a tight loop. By step 10 you have a playable R1 M1 with placeholder
 
 ---
 
+## Resolution Conventions — Working Numbers
+
+Locked as working baseline (2026-05-21). Validate after first Ludo→Godot import; revise if asset clarity / file size demands it.
+
+| Asset type | Source resolution | Notes |
+|---|---|---|
+| Characters (player presets, bosses) | 512×512 | Scaled in scene |
+| Enemies (fodder, elite) | 256×256 | Static images, tween-animated |
+| Cards (full art including frame) | 512×768 | Portrait orientation |
+| Buildings (per tier state) | 512×512 | One source per `_t1` / `_t4` / `_t8` |
+| World map | 2048×2048 | Scaled to viewport, may need zoom in later realms |
+| Region biome backgrounds | 1920×1080 | Landscape, full run-screen |
+| VFX (typical) | 256×256 | Combined with tweens / shaders |
+| VFX (screen-spanning) | 512×512 | Boss attack telegraphs, ultimate effects |
+| UI icons | 128×128 | Scaled down in HUD |
+| Sprite sheets | varies | Use power-of-2 dimensions where possible |
+
+---
+
+## Animation Handoff — Ludo → Godot
+
+Ludo outputs animations as multi-frame sprite sheets (PNG grid). Godot's AnimatedSprite2D node accepts these natively via the SpriteFrames resource. Standard workflow per animation:
+
+1. **Ludo Animate** generates a multi-frame PNG sheet (4–8 frames typical for idle/walk; ≤16 for complex attacks)
+2. Save to the appropriate `res://assets/characters/<entity>/` folder with `_sheet` suffix
+3. In Godot, create a SpriteFrames resource, import the sheet, define frame grid (rows × columns), set frame durations (typical: 0.1–0.15s per frame for idle, 0.08–0.12s for walk)
+4. Attach SpriteFrames to an AnimatedSprite2D node in the entity scene
+5. Trigger via `.play("idle")` / `.play("walk")` / etc.
+
+No external format conversion needed. Aseprite / Krita only required for sprite touch-ups.
+
+---
+
 ## Open Production Questions
 
 - **GDScript vs C#:** Defaulting GDScript. May revisit if performance bottlenecks emerge in enemy spawning or particle counts.
-- **Sprite size / resolution:** TBD. First-pass: 256px or 512px for characters, scaled in scene. Decide after first asset import.
 - **Pixel-perfect filtering vs smooth filtering:** Smooth (Linear), since we're hand-drawn, not pixel art.
 - **Aseprite / Krita integration:** Optional cleanup tool for AI sprite touch-ups if needed. Defer.

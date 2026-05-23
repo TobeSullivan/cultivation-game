@@ -37,7 +37,7 @@ Realm names are placeholders — the structural lock is scope-based progression,
 ## Map Structure
 
 - Each map is a region with the 6 universal objectives + a final boss (see [run-loop.md](run-loop.md))
-- Conquering a map = banking all 6 of its objectives
+- **Conquering a map = banking all 6 of its objectives.** Boss defeat is objective #6 of 6; map cannot be conquered without it
 - Final bosses are **named, unique, recruitable cultivators** — see [systems/boss-roster.md](../systems/boss-roster.md)
 
 ---
@@ -47,7 +47,7 @@ Realm names are placeholders — the structural lock is scope-based progression,
 - Player starts at one edge of a realm
 - Conquering a map unlocks adjacent maps
 - Player chooses the path
-- **Boss fights are not gated by completion.** Only **recruitment** is gated, and even then only for specific exotic-gate bosses.
+- **Map conquest requires boss defeat** (boss = objective #6). You cannot advance past a map by completing other objectives alone.
 
 **Adjacency patterns by realm size:**
 - **R1 (2 maps):** Linear. M1 = start, M2 unlocks after M1
@@ -58,19 +58,24 @@ Realm names are placeholders — the structural lock is scope-based progression,
 
 ## Enemy Categories
 
-Each map has 4–6 fodder types + 2–3 elite types (visual/biome variation; mechanically baseline).
+Each map has 4–6 fodder types + 2–3 elite types (visual/biome variation; mechanically baseline). Absolute HP / damage values and within-run scaling rules live in [prototype/scope.md](../prototype/scope.md) Enemy Categories section. Per-kill ambient drops live in [systems/economy.md](../systems/economy.md) Currency Ambient Drops section.
 
-| Category | HP | Damage | Speed | Spawn rate | Drops |
+| Category | HP (R1 M1 min 0) | Damage | Speed | Spawn rate | Drops summary |
 |---|---|---|---|---|---|
-| **Fodder** | 0.05× boss baseline | 0.4 (contact only) | 0.5–0.9× player | High continuous | Raw qi, occasional spirit stones |
-| **Elite** | 0.5× | 0.8 (telegraphed) | 0.4× | One every ~90 sec | Chest (3–5 cards) + tier-appropriate materials |
-| **Mini-boss** | 1.2× | 1.0 | 0.5× | One per minute past 10-min mark | Larger chest (5 cards) + better materials + sometimes inspiration fragment |
+| **Fodder** | 8 | 3 (contact only) | 0.5–0.9× player | High continuous | XP gem 1, raw qi 1, 0.1% spirit stone |
+| **Elite** | 100 | 6 (telegraphed) | 0.4× | One every ~90 sec | XP gem 5, raw qi 5, 3 essence, 1 themed material |
+| **Mini-boss** | 400 | 10 | 0.5× | One per minute past 10-min mark | XP gem 20, raw qi 20, 15 essence, 1 spirit stone, 3 themed materials |
+| **Boss (map)** | 800 (Yun anchor) | 8 | 1.0× player | 1 per map | Per rewards.md first-time; replay generic = XP gem 100, raw qi 100, 50 essence, 3 stones, 5 themed materials |
 
-**Per-realm scaling:** R1 = 1×, R2 = 1.5×, R3 = 2×. Both HP and damage scale; speed/behavior constant.
+**Per-realm scaling:** R1 = 1×, R2 = 1.5×, R3 = 2×, R4+ = 2.4× per realm. Both HP and damage scale; ambient drops scale 1:1 with the realm multiplier; speed/behavior constant.
 
 **Generic boss on replay:** the named realm-final doesn't respawn. Generic boss with mini-boss stats × ~2 appears at 5- or 10-min mark instead.
 
-**Within-run enemy HP scaling:** `HP(t) = base × 1.10^minute`. By minute 25, ~10× initial HP. Spawn density grows from ~1.5 fodder/sec at 0:00 to ~30+/sec at 25:00.
+**Within-run enemy HP scaling:** `HP(t) = base × 1.10^minute`, fodder/elite/mini-boss only. **Boss HP is absolute at encounter** — does NOT scale with spawn minute (preserves skill signal: speedrunner pops boss with less card growth). Damage does not scale within run.
+
+**Inspiration is realm-final-only.** Mini-bosses do not drop inspiration. Earlier doc versions framed mini-boss drops as "sometimes inspiration fragment" — that was stale; corrected during the 2026-05-21 audit. Realm-final boss first-time defeat is the sole inspiration source.
+
+**Spawn density:** grows from ~1.5 fodder/sec at 0:00 to ~30+/sec at 25:00. Per-realm density modifier flagged for gap-closing tranche 4.
 
 ---
 
@@ -88,25 +93,46 @@ Each map has 4–6 fodder types + 2–3 elite types (visual/biome variation; mec
 - **All defeated bosses can be recruited** into the player's sect
 - Recruitment is **automatic on defeat** when requirements are met
 - **Default requirement is just defeat.**
-- **Exotic gates are a per-boss flavor feature**, sparingly used:
-  - "Defeat with 100% region completion"
-  - "Defeat with a specific build/path active"
-  - "Defeat within X minutes"
-  - "Defeat after recruiting their rival"
-- Critical-path bosses (building-unlockers, realm-finals) are never exotic-gated.
 - Defeated boss → joins your sect as a named disciple with name, fighting style, signature technique. Some also bring **building unlocks**.
-- **No boss is ever locked out.** Late-completed exotic requirements still unlock the recruit.
+- Critical-path bosses (building-unlockers, realm-finals) are never exotic-gated.
+
+### Exotic Recruit Gates
+
+A subset of non-realm-final, non-building-unlocker map bosses have an **exotic recruit gate** — an additional condition beyond defeat. Examples:
+
+- "Defeat with 100% region completion"
+- "Defeat with a specific build/path active"
+- "Defeat within X minutes"
+- "Defeat after recruiting their rival"
+- "Recruit family member first"
+- "Building at tier X first"
+
+**Visibility (locked):** Exotic gates are **visible up-front** in mission select. Not hidden text, not faded flavor — clearly displayed alongside the standard objective list. Player chooses when to engage with full information.
+
+**Draw outcome (locked):** If the player defeats an exotic-gated boss WITHOUT having met the gate condition:
+
+- The boss "runs away" — escapes rather than being captured
+- The **boss objective does NOT bank.** Map remains incomplete
+- Player neither won nor lost — a "draw" outcome
+- Map UI flags incomplete with reason: which gate condition wasn't met
+- The boss can be re-fought once the gate condition is satisfied
+- Successful re-fight (with gate met) banks the objective and recruits the boss
+
+**Late completion (locked):** No boss is ever permanently locked out. Re-fight is always available once the gate condition is met. The boss does not vanish if the player progresses elsewhere.
+
+**Why this works:** Surfacing the gate prevents the silent-failure frustration common in genre peers (VS, Halls of Torment) where hidden recruit conditions force players to look up wikis. Players know up-front what they're walking into and can plan accordingly.
 
 ### Boss Replacement on Replay
 
 - Defeated named realm-final bosses do **not** respawn during region replays
 - Replaced by a **generic boss** at 5- or 10-minute mark
+- This also applies to exotic-gated map bosses once they've been successfully recruited
 
 ---
 
 ## Map Surfacing of Incomplete Work
 
-The Risk map UI clearly indicates regions, realms, and bosses with incomplete objectives or uncollected recruits. Subtle markers, realm-level summaries showing completion %. Lap-back legible but not pressuring.
+The Risk map UI clearly indicates regions, realms, and bosses with incomplete objectives or uncollected recruits. Subtle markers, realm-level summaries showing completion %. Lap-back legible but not pressuring. Exotic-gate "draw" maps are flagged distinctly from never-attempted maps, with the unmet condition visible.
 
 ---
 
@@ -123,12 +149,13 @@ Conquered regions passively generate, even when player is offline. All flow into
 5. **Inspiration** — drops only from realm-final boss kills, never idle; required for Stage 4+ breakthroughs
 6. Random rare drops (loot inbox)
 7. Disciple XP (assigned named disciples grow)
-8. Reputation / Influence
-9. Lore / Codex fragments
-10. Event triggers (rare boss spawns, treasure runs, hidden region unlocks, special-event recruit arrivals)
-11. Recruitment leads (passive wandering cultivator events)
+8. Lore / Codex fragments
+9. Event triggers (rare boss spawns, treasure runs, hidden region unlocks, special-event recruit arrivals)
+10. Recruitment leads (passive wandering cultivator events)
 
-Currency model, material model, and Sect Power multiplier live in [systems/economy.md](../systems/economy.md).
+Currency model, material model, Sect Power multiplier, and the full idle composition rule (region × building amplifier × Sect Power) live in [systems/economy.md](../systems/economy.md).
+
+Offline accumulation is gated by the Storehouse's offline idle cap. Base 12h (no Storehouse), climbs to 14 days at Storehouse T8 maxed. See [systems/building-tier-curves.md](../systems/building-tier-curves.md) Storehouse Offline Idle Cap Progression.
 
 ---
 
